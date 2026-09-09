@@ -326,10 +326,7 @@
         </div>
         <button class="btn-ghost" id="btnUpload">
           <span class="funnel-glyph"><span style="height:6px"></span><span style="height:11px"></span><span style="height:16px"></span></span>
-          Atualizar planilha
-        </button>
-        <button class="btn-ghost" id="btnSave" style="background:rgba(255,139,34,0.16); border-color:rgba(255,139,34,0.4);">
-          ⬇ Baixar dados (JSON p/ GitHub)
+          Atualizar planilha (teste local)
         </button>
         <button class="btn-ghost" id="btnCopyImage" style="display:none; background:rgba(255,139,34,0.16); border-color:rgba(255,139,34,0.4);">
           📋 Copiar imagem do ranking
@@ -416,7 +413,7 @@
 
 </div>
 
-<footer>Painel alimentado pela planilha "TD Painel" · clique em "Atualizar planilha" para carregar uma nova exportação, depois em "Baixar dados (JSON p/ GitHub)" para gerar o arquivo a subir no repositório</footer>
+<footer>Painel alimentado automaticamente pelo .xlsx "TD Painel" hospedado no GitHub · "Atualizar planilha (teste local)" serve só para pré-visualizar um arquivo antes de subir ao repositório</footer>
 
 </div>
 
@@ -425,25 +422,33 @@
 <script>
 /* ============================================================
    FONTE DE DADOS EXTERNA (GitHub)
-   O código deste arquivo NÃO muda mais. Os dados (gerentes,
-   supervisores, histórico mensal etc.) ficam em um arquivo JSON
-   separado, hospedado no GitHub. Para atualizar o painel, basta
-   subir um novo "dados.json" no repositório — este HTML sempre
-   busca a versão mais recente sozinho, toda vez que é aberto.
+   O código deste arquivo NÃO muda mais. Os dados vêm direto do
+   arquivo .xlsx (a mesma planilha "TD Painel" que você já usa no
+   botão "Atualizar planilha"), hospedado no GitHub. Para atualizar
+   o painel, basta subir/substituir esse .xlsx no repositório — o
+   HTML busca e parseia a versão mais recente sozinho, toda vez que
+   é aberto. Não depende de nenhum arquivo .json intermediário.
 
-   COMO CONFIGURAR:
-   1) Suba o arquivo JSON exportado (ver botão "Atualizar planilha"
-      → agora ele baixa um .json, não mais um .html) no seu
-      repositório do GitHub, por exemplo em /dados/dados.json.
-   2) Pegue o link "raw" do arquivo (Raw button no GitHub), algo como:
-      https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/dados/dados.json
+   COMO CONFIGURAR (uma única vez):
+   1) Suba o arquivo .xlsx (planilha "TD Painel") no seu repositório
+      do GitHub, por exemplo em /dados/td_painel.xlsx.
+   2) No GitHub, abra o arquivo e copie o link do botão "Download"
+      (ou construa o link raw), algo como:
+      https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/dados/td_painel.xlsx
    3) Cole esse link abaixo, na constante DATA_URL.
-=============================================================*/
-const DATA_URL = 'COLE_AQUI_O_LINK_RAW_DO_GITHUB/dados.json';
+   4) Suba este próprio HTML (com DATA_URL já preenchido) no GitHub
+      também — esse é o "código", que não precisa mudar mais.
 
-// Busca os dados no GitHub. Se falhar (link não configurado, offline,
-// GitHub fora do ar etc.), usa o snapshot embutido no arquivo como
-// fallback, para o painel nunca ficar completamente inutilizável.
+   Depois disso, para atualizar os números: só substitua o .xlsx no
+   GitHub (mesmo nome/caminho). Não precisa tocar no HTML de novo.
+=============================================================*/
+const DATA_URL = 'COLE_AQUI_O_LINK_RAW_DO_GITHUB/td_painel.xlsx';
+
+// Busca o .xlsx no GitHub e usa a mesma função de parse do botão
+// "Atualizar planilha" (parseWorkbook). Se falhar (link não
+// configurado, offline, GitHub fora do ar, planilha corrompida etc.),
+// usa o snapshot embutido no arquivo como fallback, para o painel
+// nunca ficar completamente inutilizável.
 const RAW_READY = (async function loadRemoteData(){
   const fallback = JSON.parse(document.getElementById('default-data').textContent);
   if(!DATA_URL || DATA_URL.indexOf('COLE_AQUI') !== -1){
@@ -454,13 +459,14 @@ const RAW_READY = (async function loadRemoteData(){
     // Cache-busting para não pegar uma versão antiga em cache do GitHub/CDN
     const res = await fetch(DATA_URL + (DATA_URL.includes('?') ? '&' : '?') + 't=' + Date.now(), { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if(!data || (!Array.isArray(data.house) && !Array.isArray(data.imob))){
-      throw new Error('Formato inesperado no JSON remoto');
+    const arrayBuffer = await res.arrayBuffer();
+    const data = parseWorkbook(arrayBuffer);
+    if(!data || (data.house.length===0 && data.imob.length===0)){
+      throw new Error('Nenhum dado reconhecido no .xlsx remoto (verifique a aba "TD Painel")');
     }
     return data;
   }catch(err){
-    console.warn('Falha ao buscar DATA_URL, usando dados locais embutidos:', err);
+    console.warn('Falha ao buscar/parsear DATA_URL, usando dados locais embutidos:', err);
     return fallback;
   }
 })();
@@ -1305,36 +1311,6 @@ async function copyRankingImage(){
   }
 }
 
-function exportHTML(){
-  // O código do painel (este arquivo .html) não muda mais.
-  // Esta função agora baixa SOMENTE o JSON de dados (com as remoções
-  // aplicadas), que deve ser subido ao GitHub substituindo o arquivo
-  // apontado por DATA_URL. Da próxima vez que o painel for aberto,
-  // ele busca esse JSON atualizado automaticamente.
-  const exportData = {
-    house: RAW.house.filter(e => !removedNames.house.has(e.nome)),
-    imob: RAW.imob.filter(e => !removedNames.imob.has(e.nome)),
-    stages: RAW.stages,
-    stage_labels: RAW.stage_labels,
-    available_months: RAW.available_months || []
-  };
-
-  const statusEl = document.getElementById('uploadStatus');
-  if(statusEl) statusEl.textContent = `Dados exportados em ${new Date().toLocaleString('pt-BR')} · ${exportData.house.length} gerentes · ${exportData.imob.length} supervisores · histórico até ${monthLabel(CURRENT_MONTH)}`;
-
-  const jsonStr = JSON.stringify(exportData);
-  const blob = new Blob([jsonStr], {type:'application/json;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `dados.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('dados.json baixado — suba esse arquivo no GitHub, substituindo o atual, no caminho apontado por DATA_URL.', 5000);
-}
-
 /* ============================================================
    INIT
 =============================================================*/
@@ -1368,7 +1344,6 @@ function initApp(){
     removedNames[baseKey].clear();
     renderAll();
   });
-  document.getElementById('btnSave').addEventListener('click', exportHTML);
   document.getElementById('fileInput').addEventListener('change', (e)=>{
     const file = e.target.files[0];
     if(!file) return;
