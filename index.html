@@ -442,18 +442,20 @@
    Depois disso, para atualizar os números: só substitua o .xlsx no
    GitHub (mesmo nome/caminho). Não precisa tocar no HTML de novo.
 =============================================================*/
-const DATA_URL = 'https://raw.githubusercontent.com/SPIPerformance/Desafiodos30/refs/heads/main/Dados.xlsx';
+const DATA_URL = 'https://raw.githubusercontent.com/SPIPerformance/Desafiodos30/main/Dados.xlsx';
 
 // Busca o .xlsx no GitHub e usa a mesma função de parse do botão
 // "Atualizar planilha" (parseWorkbook). Se falhar (link não
 // configurado, offline, GitHub fora do ar, planilha corrompida etc.),
 // usa o snapshot embutido no arquivo como fallback, para o painel
-// nunca ficar completamente inutilizável.
+// nunca ficar completamente inutilizável. Também guarda a ORIGEM dos
+// dados (github/fallback) para mostrar isso claramente na tela — em
+// vez de falhar em silêncio e só avisar no console.
 const RAW_READY = (async function loadRemoteData(){
   const fallback = JSON.parse(document.getElementById('default-data').textContent);
   if(!DATA_URL || DATA_URL.indexOf('COLE_AQUI') !== -1){
     console.warn('DATA_URL não configurada — usando dados locais embutidos.');
-    return fallback;
+    return { data: fallback, source: 'fallback', reason: 'DATA_URL não configurada' };
   }
   try{
     // Cache-busting para não pegar uma versão antiga em cache do GitHub/CDN
@@ -464,10 +466,10 @@ const RAW_READY = (async function loadRemoteData(){
     if(!data || (data.house.length===0 && data.imob.length===0)){
       throw new Error('Nenhum dado reconhecido no .xlsx remoto (verifique a aba "TD Painel")');
     }
-    return data;
+    return { data, source: 'github', reason: null };
   }catch(err){
     console.warn('Falha ao buscar/parsear DATA_URL, usando dados locais embutidos:', err);
-    return fallback;
+    return { data: fallback, source: 'fallback', reason: (err && err.message) ? err.message : String(err) };
   }
 })();
 
@@ -492,7 +494,9 @@ const RAW_READY = (async function loadRemoteData(){
       const originalLabel = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Carregando dados...';
-      RAW = await RAW_READY;
+      const loaded = await RAW_READY;
+      RAW = loaded.data;
+      window.__DATA_SOURCE__ = loaded; // usado pelo initApp() para mostrar a origem dos dados
       STAGES = RAW.stages;
       LABELS = RAW.stage_labels;
       submitBtn.disabled = false;
@@ -1315,6 +1319,19 @@ async function copyRankingImage(){
    INIT
 =============================================================*/
 function initApp(){
+  // Mostra claramente se os dados vieram do GitHub ou do modo de
+  // segurança (fallback embutido), para nunca mais falhar em silêncio.
+  const srcInfo = window.__DATA_SOURCE__;
+  const statusEl0 = document.getElementById('uploadStatus');
+  if(srcInfo && statusEl0){
+    if(srcInfo.source === 'github'){
+      statusEl0.textContent = `✅ Dados carregados do GitHub em ${new Date().toLocaleString('pt-BR')} · ${RAW.house.length} gerentes · ${RAW.imob.length} supervisores`;
+      statusEl0.style.color = '';
+    } else {
+      statusEl0.textContent = `⚠️ Não foi possível carregar do GitHub (${srcInfo.reason || 'motivo desconhecido'}) — exibindo dados locais de segurança.`;
+      statusEl0.style.color = '#b23b3b';
+    }
+  }
   function setCanal(newCanal, activeBtnId){
     CANAL = newCanal; regionalFilter='ALL'; expandedRow=null;
     ['btnHouse','btnImob','btnRankHouse','btnRankImob'].forEach(id=>{
