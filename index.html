@@ -444,6 +444,10 @@
 =============================================================*/
 const DATA_URL = 'https://raw.githubusercontent.com/SPIPerformance/Desafiodos30/main/Dados.xlsx';
 
+const INIT_DATA = JSON.parse(document.getElementById('default-data').textContent);
+let STAGES = INIT_DATA.stages;
+let LABELS = INIT_DATA.stage_labels;
+
 // Busca o .xlsx no GitHub e usa a mesma função de parse do botão
 // "Atualizar planilha" (parseWorkbook). Se falhar (link não
 // configurado, offline, GitHub fora do ar, planilha corrompida etc.),
@@ -534,8 +538,7 @@ let removedNames = { house: new Set(), imob: new Set() };
 const today = new Date();
 let meta = Math.max(0, today.getDate() - 1);
 
-let STAGES = null;
-let LABELS = null;
+
 
 /* ============================================================
    MÊS VIGENTE — calculado sempre a partir da data real do sistema.
