@@ -1169,6 +1169,18 @@ function normAbbr(s){
   return `${y}-${MESES_ABREV_JS[mmm.trim().toLowerCase()]}`;
 }
 
+// Schema fixo das etapas do funil, usado DENTRO do parseWorkbook.
+// Importante: isto é independente da variável global STAGES (que só é
+// preenchida depois do login) — parseWorkbook pode ser chamado antes
+// disso, durante o carregamento automático do .xlsx do GitHub.
+const STAGE_KEYS = ['LEAD','DOC_ENVIADA','DOC_ANALISE','CPF_ANALISADO','CPF_APROVADO','CONTRATO_GERADO','CONTRATO_ASSINADO','REPASSE','GANHO','REGISTRO'];
+const STAGE_LABELS_STATIC = {
+  LEAD:'Lead', DOC_ENVIADA:'Doc. Enviada', DOC_ANALISE:'Doc. em Análise',
+  CPF_ANALISADO:'CPF Analisado', CPF_APROVADO:'CPF Aprov./Cond.',
+  CONTRATO_GERADO:'Contrato Gerado', CONTRATO_ASSINADO:'Contrato Assinado',
+  REPASSE:'Repasse', GANHO:'Ganho', REGISTRO:'Registro'
+};
+
 function parseWorkbook(ab){
   const wb = XLSX.read(ab, {type:'array'});
   const sheetName = wb.SheetNames.find(n => n.trim().toLowerCase() === 'td painel') || wb.SheetNames[0];
