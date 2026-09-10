@@ -536,7 +536,17 @@ function limitName(fullName, maxWords){
   maxWords = maxWords || 3;
   const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
   if(parts.length <= maxWords) return fullName;
-  return parts.slice(0, maxWords).join(' ');
+  
+  let limit = maxWords;
+  const preposicoes = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+  
+  // Se a última palavra dentro do limite for uma preposição, 
+  // avançamos 1 palavra a mais para incluir o sobrenome real.
+  if (preposicoes.has(parts[limit - 1].toLowerCase()) && parts.length > limit) {
+    limit++;
+  }
+  
+  return parts.slice(0, limit).join(' ');
 }
 
 // heatmap com pontos de corte assimétricos: <=redMax vermelho puro, >=greenMin verde puro,
