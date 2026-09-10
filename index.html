@@ -474,119 +474,6 @@ const RAW_READY = (async function loadRemoteData(){
 })();
 
 /* ============================================================
-   PERSISTÊNCIA DE REMOÇÕES NO GITHUB
-   Toda vez que um gerente/supervisor é removido (ou restaurado) no
-   painel, a lista de removidos é salva automaticamente em um
-   arquivo à parte (REMOVED_FILE_PATH) no mesmo repositório do
-   GitHub. Assim a remoção vale pra quem quer que abra o painel
-   depois, e continua valendo mesmo depois de fechar a aba —
-   sem precisar gerar/baixar/subir nada manualmente.
-
-   COMO CONFIGURAR (uma única vez):
-   1) No GitHub, vá em Settings → Developer settings → Fine-grained
-      tokens → Generate new token. Dê acesso SOMENTE a este
-      repositório, e em "Repository permissions" marque
-      "Contents: Read and write".
-   2) Cole esse token abaixo, em GITHUB_TOKEN.
-   3) Confirme/ajuste GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH e
-      REMOVED_FILE_PATH conforme seu repositório (o arquivo não
-      precisa existir ainda — ele é criado sozinho no primeiro
-      salvamento).
-
-   ⚠️ ATENÇÃO — SEGURANÇA: esse token fica visível a qualquer pessoa
-   que abrir este HTML e olhar o código-fonte da página (é assim que
-   funciona qualquer chamada de API feita direto do navegador, sem
-   um servidor no meio). Por isso:
-   - Use um token com o MÍNIMO de permissão possível: só "Contents",
-     só neste UM repositório, nunca acesso à conta inteira.
-   - Não reaproveite esse token em nenhum outro lugar.
-   - Compartilhe este arquivo só com quem já tem acesso ao repositório.
-=============================================================*/
-const GITHUB_OWNER = 'SPIPerformance';
-const GITHUB_REPO = 'Desafiodos30';
-const GITHUB_BRANCH = 'main';
-const REMOVED_FILE_PATH = 'removidos.json';
-const GITHUB_TOKEN = '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';
-
-const REMOVED_DATA_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${REMOVED_FILE_PATH}`;
-
-// Busca a lista de removidos já salva no GitHub. Se o arquivo ainda
-// não existir (primeira vez) ou a busca falhar, começa vazio — ninguém
-// fica removido por engano.
-const REMOVED_READY = (async function loadRemovedRemote(){
-  try{
-    const res = await fetch(REMOVED_DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
-    if(!res.ok) return { house: [], imob: [] };
-    const data = await res.json();
-    return {
-      house: Array.isArray(data.house) ? data.house : [],
-      imob: Array.isArray(data.imob) ? data.imob : []
-    };
-  }catch(err){
-    console.warn('Não foi possível carregar removidos.json do GitHub — começando vazio:', err);
-    return { house: [], imob: [] };
-  }
-})();
-
-let githubSaveInFlight = false;
-let githubSaveQueued = false;
-
-// Envia a lista atual de removidos (removedNames) para o GitHub via
-// API de conteúdo de arquivos. Chamado toda vez que alguém remove ou
-// restaura um gerente/supervisor.
-async function saveRemovedToGitHub(){
-  if(!GITHUB_TOKEN || GITHUB_TOKEN.indexOf('COLE_AQUI') !== -1){
-    console.warn('GITHUB_TOKEN não configurado — a remoção ficou salva só neste navegador (localStorage/sessão), não no GitHub.');
-    showToast('⚠️ GITHUB_TOKEN não configurado — remoção salva só neste navegador.', 4500);
-    return;
-  }
-  // Evita duas gravações simultâneas brigarem pelo mesmo arquivo;
-  // se já tem uma gravação em andamento, agenda uma nova logo depois.
-  if(githubSaveInFlight){ githubSaveQueued = true; return; }
-  githubSaveInFlight = true;
-  try{
-    const payload = {
-      house: Array.from(removedNames.house),
-      imob: Array.from(removedNames.imob)
-    };
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${REMOVED_FILE_PATH}`;
-
-    // Precisa do "sha" do arquivo atual pra poder sobrescrevê-lo (a API
-    // do GitHub exige isso quando o arquivo já existe; se ainda não
-    // existir, seguimos sem sha e ele é criado do zero).
-    let sha;
-    try{
-      const getRes = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}&t=` + Date.now(), {
-        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json' }
-      });
-      if(getRes.ok){ sha = (await getRes.json()).sha; }
-    }catch(e){ /* arquivo pode não existir ainda — tudo bem */ }
-
-    const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-    const putRes = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json' },
-      body: JSON.stringify(Object.assign({
-        message: `Atualiza removidos.json (${payload.house.length} gerentes, ${payload.imob.length} supervisores removidos)`,
-        content: contentB64,
-        branch: GITHUB_BRANCH
-      }, sha ? { sha } : {}))
-    });
-    if(!putRes.ok){
-      const errBody = await putRes.text().catch(()=> '');
-      throw new Error(`HTTP ${putRes.status}${errBody ? ' — ' + errBody : ''}`);
-    }
-    showToast('Remoção salva no GitHub ✅');
-  }catch(err){
-    console.error('Falha ao salvar removidos.json no GitHub:', err);
-    showToast('⚠️ Não foi possível salvar a remoção no GitHub — ficou salva só neste navegador.', 5000);
-  }finally{
-    githubSaveInFlight = false;
-    if(githubSaveQueued){ githubSaveQueued = false; saveRemovedToGitHub(); }
-  }
-}
-
-/* ============================================================
    EMAIL GATE LOGIC
 =============================================================*/
 (function(){
@@ -607,13 +494,11 @@ async function saveRemovedToGitHub(){
       const originalLabel = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Carregando dados...';
-      const [loaded, removedRemote] = await Promise.all([RAW_READY, REMOVED_READY]);
+      const loaded = await RAW_READY;
       RAW = loaded.data;
       window.__DATA_SOURCE__ = loaded; // usado pelo initApp() para mostrar a origem dos dados
       STAGES = RAW.stages;
       LABELS = RAW.stage_labels;
-      removedNames.house = new Set(removedRemote.house);
-      removedNames.imob = new Set(removedRemote.imob);
       submitBtn.disabled = false;
       submitBtn.textContent = originalLabel;
       overlay.style.display = 'none';
@@ -940,7 +825,6 @@ function renderTable(rows){
         removedNames[CANAL].add(name);
         if(expandedRow===name) expandedRow=null;
         renderAll();
-        saveRemovedToGitHub();
       }
     });
   });
@@ -1127,6 +1011,32 @@ function renderComparativo(r){
 /* ============================================================
    FILTERING
 =============================================================*/
+// Nomes ocultados permanentemente no código (independe da planilha e
+// da fonte de dados — vale tanto pro .xlsx do GitHub quanto pro
+// fallback local). Comparação ignora maiúsculas/minúsculas e acentos,
+// e usa "começa com" — então "ANDRÉ" aqui já basta pra pegar
+// "ANDRÉ SOBRENOME..." sem precisar do nome completo.
+const HIDDEN_NAMES = {
+  house: ['ANDRÉ'],
+  imob: ['KAUE DA SILVA ROSA']
+};
+function normalizeName(s){
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .toUpperCase().trim();
+}
+function isHiddenByCode(baseCanal, nome){
+  const list = HIDDEN_NAMES[baseCanal] || [];
+  const nameTokens = normalizeName(nome).split(/\s+/).filter(Boolean);
+  // Compara palavra por palavra (não é apenas "começa com o texto"),
+  // pra "ANDRÉ" não bater com "ANDREA" por engano, por exemplo.
+  return list.some(h => {
+    const hTokens = normalizeName(h).split(/\s+/).filter(Boolean);
+    if(hTokens.length > nameTokens.length) return false;
+    return hTokens.every((t, i) => nameTokens[i] === t);
+  });
+}
+
 // Regra única de "ativo": usada tanto no Canal House/Imob quanto nos
 // Rankings, para que os rankings sejam sempre espelho de quem está
 // atualmente ativo nos canais (sem lógica duplicada/divergente).
@@ -1136,6 +1046,9 @@ function getActiveRows(baseCanal){
   return getMonthRows(baseCanal, CURRENT_MONTH).filter(r => {
     // 1. Remove os que foram ocultados manualmente no (x)
     if(removedNames[baseCanal].has(r.nome)) return false;
+
+    // 1b. Remove os ocultados permanentemente no código (ver HIDDEN_NAMES acima)
+    if(isHiddenByCode(baseCanal, r.nome)) return false;
 
     // 2. Busca o histórico da pessoa
     const entry = findEntry(baseCanal, r.nome);
@@ -1482,13 +1395,11 @@ function initApp(){
     const baseKey = (CANAL === 'rank_house') ? 'house' : (CANAL === 'rank_imob') ? 'imob' : CANAL;
     removedNames[baseKey].clear();
     renderAll();
-    saveRemovedToGitHub();
   });
   document.getElementById('btnRestoreRank').addEventListener('click', ()=>{
     const baseKey = (CANAL === 'rank_house') ? 'house' : (CANAL === 'rank_imob') ? 'imob' : CANAL;
     removedNames[baseKey].clear();
     renderAll();
-    saveRemovedToGitHub();
   });
   document.getElementById('fileInput').addEventListener('change', (e)=>{
     const file = e.target.files[0];
