@@ -38,55 +38,7 @@
   .mono{font-family:'IBM Plex Mono',monospace; font-variant-numeric: tabular-nums;}
   .display{font-family:'Space Grotesk',sans-serif;}
 
-  /* ============================================================
-     EMAIL GATE
-  =============================================================*/
-  #gateOverlay{
-    position:fixed; inset:0; z-index:9999;
-    background:radial-gradient(circle at 30% 20%, #0A2E1C 0%, #071F13 60%, #05170E 100%);
-    display:flex; align-items:center; justify-content:center;
-    color:#fff; font-family:'Inter';
-  }
-  .gate-card{
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.14);
-    backdrop-filter:blur(6px);
-    border-radius:16px;
-    padding:40px 40px 34px 40px;
-    width:380px;
-    max-width:90vw;
-    text-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,0.4);
-  }
-  .gate-mark{
-    width:52px; height:52px; margin:0 auto 18px auto;
-    border-radius:12px;
-    background:linear-gradient(135deg, var(--brand-2), var(--accent));
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Grotesk'; font-weight:700; font-size:20px; color:#fff;
-  }
-  .gate-card h2{ font-family:'Space Grotesk'; font-size:19px; margin:0 0 6px 0; font-weight:700;}
-  .gate-card p{ font-size:13px; color:#C7D6CC; margin:0 0 22px 0; line-height:1.5;}
-  .gate-card input{
-    width:100%; padding:12px 14px; border-radius:9px; border:1px solid rgba(255,255,255,0.22);
-    background:rgba(255,255,255,0.07); color:#fff; font-size:14px; margin-bottom:12px; font-family:'Inter';
-  }
-  .gate-card input::placeholder{ color:#8FA79A; }
-  .gate-card input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
-  .gate-card button{
-    width:100%; padding:12px 14px; border-radius:9px; border:none;
-    background:var(--accent); color:#291200; font-weight:700; font-size:14px; cursor:pointer;
-    font-family:'Inter'; transition:filter .15s;
-  }
-  .gate-card button:hover{ filter:brightness(1.08); }
-  .gate-error{ color:#FF9B9B; font-size:12.5px; margin-top:10px; min-height:16px; font-weight:600;}
-  #gateBlocked{
-    display:none; position:fixed; inset:0; z-index:10000; background:#0B0B0C; color:#fff;
-    align-items:center; justify-content:center; flex-direction:column; text-align:center; font-family:'Inter';
-  }
-  #gateBlocked h1{ font-family:'Space Grotesk'; font-size:30px; color:#FF6B6B; margin-bottom:8px;}
-  #gateBlocked p{ color:#9AA3AA; font-size:14px; }
-  #appRoot{ display:none; }
+  
 
   /* ---------- TOP BAR ---------- */
   .topbar{
@@ -286,23 +238,7 @@
 </head>
 <body>
 
-<!-- ============================================================
-     EMAIL GATE
-=============================================================-->
-<div id="gateOverlay">
-  <div class="gate-card">
-    <div class="gate-mark">M</div>
-    <h2>Acesso restrito</h2>
-    <p>Este painel contém dados comerciais internos da MRV. Informe seu e-mail corporativo (@mrv.com.br) para continuar.</p>
-    <input type="email" id="gateEmail" placeholder="seu.nome@mrv.com.br" autocomplete="off">
-    <button id="gateSubmit">Entrar</button>
-    <div class="gate-error" id="gateError"></div>
-  </div>
-</div>
-<div id="gateBlocked">
-  <h1>Usuário proibido</h1>
-  <p>Este e-mail não tem permissão para acessar o painel. A janela será fechada.</p>
-</div>
+
 
 <!-- ============================================================
      APP
@@ -474,48 +410,15 @@ const RAW_READY = (async function loadRemoteData(){
 })();
 
 /* ============================================================
-   EMAIL GATE LOGIC
+   APP INITIALIZATION
 =============================================================*/
-(function(){
-  const overlay = document.getElementById('gateOverlay');
-  const blocked = document.getElementById('gateBlocked');
-  const appRoot = document.getElementById('appRoot');
-  const emailInput = document.getElementById('gateEmail');
-  const errorEl = document.getElementById('gateError');
-  const submitBtn = document.getElementById('gateSubmit');
-
-  async function tryEnter(){
-    const val = (emailInput.value || '').trim().toLowerCase();
-    if(!val){
-      errorEl.textContent = 'Informe um e-mail para continuar.';
-      return;
-    }
-    if(val.endsWith('@mrv.com.br')){
-      const originalLabel = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Carregando dados...';
-      const loaded = await RAW_READY;
-      RAW = loaded.data;
-      window.__DATA_SOURCE__ = loaded; // usado pelo initApp() para mostrar a origem dos dados
-      STAGES = RAW.stages;
-      LABELS = RAW.stage_labels;
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalLabel;
-      overlay.style.display = 'none';
-      appRoot.style.display = 'block';
-      initApp();
-    } else {
-      overlay.style.display = 'none';
-      blocked.style.display = 'flex';
-      setTimeout(()=>{
-        window.close();
-        // fallback caso o navegador bloqueie o fechamento de aba
-        blocked.querySelector('p').textContent = 'Este e-mail não tem permissão para acessar o painel. Feche esta aba para sair.';
-      }, 900);
-    }
-  }
-  submitBtn.addEventListener('click', tryEnter);
-  emailInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryEnter(); });
+(async function startApp(){
+  const loaded = await RAW_READY;
+  RAW = loaded.data;
+  window.__DATA_SOURCE__ = loaded;
+  STAGES = RAW.stages;
+  LABELS = RAW.stage_labels;
+  initApp();
 })();
 
 /* ============================================================
