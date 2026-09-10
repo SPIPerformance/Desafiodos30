@@ -1145,6 +1145,18 @@ const FUNNEL_MAP = {
   'REGISTRO':'REGISTRO',
 };
 
+// Schema fixo das etapas do funil, usado DENTRO do parseWorkbook.
+// Importante: isto é independente da variável global STAGES (que só é
+// preenchida depois do login) — parseWorkbook pode ser chamado antes
+// disso, durante o carregamento automático do .xlsx do GitHub.
+const STAGE_KEYS = ['LEAD','DOC_ENVIADA','DOC_ANALISE','CPF_ANALISADO','CPF_APROVADO','CONTRATO_GERADO','CONTRATO_ASSINADO','REPASSE','GANHO','REGISTRO'];
+const STAGE_LABELS_STATIC = {
+  LEAD:'Lead', DOC_ENVIADA:'Doc. Enviada', DOC_ANALISE:'Doc. em Análise',
+  CPF_ANALISADO:'CPF Analisado', CPF_APROVADO:'CPF Aprov./Cond.',
+  CONTRATO_GERADO:'Contrato Gerado', CONTRATO_ASSINADO:'Contrato Assinado',
+  REPASSE:'Repasse', GANHO:'Ganho', REGISTRO:'Registro'
+};
+
 const MESES_ABREV_JS = {jan:'01',fev:'02',mar:'03',abr:'04',mai:'05',jun:'06',jul:'07',ago:'08',set:'09',out:'10',nov:'11',dez:'12'};
 function normFull(dateStr){
   // '01/08/2026' -> '2026-08'
@@ -1182,7 +1194,7 @@ function parseWorkbook(ab){
   const house = {};
   const imob = {};
   function ensure(map, name){ if(!map[name]) map[name] = {regional:null, months:{}}; return map[name]; }
-  function ensureMonth(entry, mk){ if(!entry.months[mk]) entry.months[mk] = {}; STAGES.forEach(s=>{ if(entry.months[mk][s]===undefined) entry.months[mk][s]=0; }); return entry.months[mk]; }
+  function ensureMonth(entry, mk){ if(!entry.months[mk]) entry.months[mk] = {}; STAGE_KEYS.forEach(s=>{ if(entry.months[mk][s]===undefined) entry.months[mk][s]=0; }); return entry.months[mk]; }
 
   for(let r=8; r<grid.length; r++){
     const row = grid[r] || [];
@@ -1279,7 +1291,7 @@ function parseWorkbook(ab){
     });
   }
 
-  return { house: buildEntries(house, true), imob: buildEntries(imob, false), stages: STAGES, stage_labels: LABELS };
+  return { house: buildEntries(house, true), imob: buildEntries(imob, false), stages: STAGE_KEYS, stage_labels: STAGE_LABELS_STATIC };
 }
 
 /* ============================================================
