@@ -38,7 +38,55 @@
   .mono{font-family:'IBM Plex Mono',monospace; font-variant-numeric: tabular-nums;}
   .display{font-family:'Space Grotesk',sans-serif;}
 
-  
+  /* ============================================================
+     EMAIL GATE
+  =============================================================*/
+  #gateOverlay{
+    position:fixed; inset:0; z-index:9999;
+    background:radial-gradient(circle at 30% 20%, #0A2E1C 0%, #071F13 60%, #05170E 100%);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Inter';
+  }
+  .gate-card{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.14);
+    backdrop-filter:blur(6px);
+    border-radius:16px;
+    padding:40px 40px 34px 40px;
+    width:380px;
+    max-width:90vw;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  .gate-mark{
+    width:52px; height:52px; margin:0 auto 18px auto;
+    border-radius:12px;
+    background:linear-gradient(135deg, var(--brand-2), var(--accent));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk'; font-weight:700; font-size:20px; color:#fff;
+  }
+  .gate-card h2{ font-family:'Space Grotesk'; font-size:19px; margin:0 0 6px 0; font-weight:700;}
+  .gate-card p{ font-size:13px; color:#C7D6CC; margin:0 0 22px 0; line-height:1.5;}
+  .gate-card input{
+    width:100%; padding:12px 14px; border-radius:9px; border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.07); color:#fff; font-size:14px; margin-bottom:12px; font-family:'Inter';
+  }
+  .gate-card input::placeholder{ color:#8FA79A; }
+  .gate-card input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .gate-card button{
+    width:100%; padding:12px 14px; border-radius:9px; border:none;
+    background:var(--accent); color:#291200; font-weight:700; font-size:14px; cursor:pointer;
+    font-family:'Inter'; transition:filter .15s;
+  }
+  .gate-card button:hover{ filter:brightness(1.08); }
+  .gate-error{ color:#FF9B9B; font-size:12.5px; margin-top:10px; min-height:16px; font-weight:600;}
+  #gateBlocked{
+    display:none; position:fixed; inset:0; z-index:10000; background:#0B0B0C; color:#fff;
+    align-items:center; justify-content:center; flex-direction:column; text-align:center; font-family:'Inter';
+  }
+  #gateBlocked h1{ font-family:'Space Grotesk'; font-size:30px; color:#FF6B6B; margin-bottom:8px;}
+  #gateBlocked p{ color:#9AA3AA; font-size:14px; }
+  #appRoot{ display:none; }
 
   /* ---------- TOP BAR ---------- */
   .topbar{
@@ -80,6 +128,31 @@
   }
   .canal-toggle button.active{ background:var(--accent); color:#291200; }
   .canal-toggle button:hover:not(.active){ color:#fff; }
+
+  .ranking-menu-btn{
+    position:absolute; top:20px; right:26px; z-index:5;
+    width:36px; height:36px; border-radius:9px;
+    background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22);
+    color:#fff; font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+  }
+  .ranking-menu-btn:hover{ background:rgba(255,255,255,0.22); }
+  .ranking-menu{
+    position:absolute; top:62px; right:26px; z-index:20;
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    box-shadow:0 12px 32px rgba(0,0,0,0.22);
+    padding:6px; min-width:210px;
+    display:none; flex-direction:column; gap:2px;
+  }
+  .ranking-menu.show{ display:flex; }
+  .ranking-menu button{
+    text-align:left; border:none; background:transparent; cursor:pointer;
+    padding:10px 12px; border-radius:7px; font-family:'Inter';
+    font-size:13px; font-weight:600; color:var(--ink-2);
+  }
+  .ranking-menu button:hover{ background:#F3F8F5; }
+  .ranking-menu button.active{ background:var(--green-soft); color:var(--brand-2); }
 
   .btn-ghost{
     background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#fff;
@@ -203,12 +276,6 @@
   .cmp-down{ background:var(--red-soft); color:#B42318; }
   .cmp-flat{ background:#EEF1EE; color:var(--muted); }
 
-  .btn-remove{
-    border:1px solid var(--line); background:#fff; color:var(--red); width:26px; height:26px;
-    border-radius:6px; cursor:pointer; font-size:14px; line-height:1; font-weight:700;
-    display:inline-flex; align-items:center; justify-content:center; transition:all .12s;
-  }
-  .btn-remove:hover{ background:var(--red); color:#fff; border-color:var(--red); }
   .restore-chip{
     border:1px dashed var(--accent); background:var(--accent-soft); color:#8A4A0F;
     border-radius:999px; padding:6px 13px; font-size:12px; font-weight:700; cursor:pointer;
@@ -238,7 +305,23 @@
 </head>
 <body>
 
-
+<!-- ============================================================
+     EMAIL GATE
+=============================================================-->
+<div id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-mark">M</div>
+    <h2>Acesso restrito</h2>
+    <p>Este painel contém dados comerciais internos da MRV. Informe seu e-mail corporativo (@mrv.com.br) para continuar.</p>
+    <input type="email" id="gateEmail" placeholder="seu.nome@mrv.com.br" autocomplete="off">
+    <button id="gateSubmit">Entrar</button>
+    <div class="gate-error" id="gateError"></div>
+  </div>
+</div>
+<div id="gateBlocked">
+  <h1>Usuário proibido</h1>
+  <p>Este e-mail não tem permissão para acessar o painel. A janela será fechada.</p>
+</div>
 
 <!-- ============================================================
      APP
@@ -246,6 +329,11 @@
 <div id="appRoot">
 
 <div class="topbar">
+  <button class="ranking-menu-btn" id="btnRankingMenu" title="Rankings">⋮</button>
+  <div class="ranking-menu" id="rankingMenu">
+    <button id="btnRankHouse">🏆 Ranking Gerentes</button>
+    <button id="btnRankImob">🏆 Ranking Supervisores</button>
+  </div>
   <div class="topbar-row">
     <div class="brand-block">
       <div class="eyebrow">Diretoria Comercial · SPI · MRV</div>
@@ -257,8 +345,6 @@
         <div class="canal-toggle">
           <button id="btnHouse" class="">Canal House</button>
           <button id="btnImob" class="active">Canal Imob</button>
-          <button id="btnRankHouse" class="">Ranking Gerentes</button>
-          <button id="btnRankImob" class="">Ranking Supervisores</button>
         </div>
         <button class="btn-ghost" id="btnUpload">
           <span class="funnel-glyph"><span style="height:6px"></span><span style="height:11px"></span><span style="height:16px"></span></span>
@@ -275,10 +361,6 @@
 </div>
 
 <div class="wrap">
-
-  <div id="rankRestoreBar" style="display:none; margin-bottom:14px;">
-    <span class="restore-chip" id="btnRestoreRank">↺ Restaurar removidos</span>
-  </div>
 
   <div id="captureArea">
   <div class="kpi-grid" id="kpiGrid">
@@ -322,10 +404,6 @@
       <input type="number" id="metaInput" min="0">
       <span class="meta-note" id="metaNote">Meta automática: dia atual (8) − 1</span>
     </div>
-    <div class="field" id="restoreField" style="display: none;">
-      <label>&nbsp;</label>
-      <div class="restore-chip" id="btnRestore">↺ Restaurar 1 removido</div>
-    </div>
     <div class="spacer"></div>
     <div class="result-count" id="resultCount">43 gerentes exibidos</div>
   </div>
@@ -333,8 +411,8 @@
   <div class="table-card">
     <div class="table-scroll">
       <table id="mainTable">
-        <thead><tr id="tableHead"><th style="width:34px"></th><th class="" data-key="regional">Regional</th><th class="left" data-key="nome">Gerente</th><th class="" data-key="LEAD">Leads</th><th class="" data-key="lead_doc">Lead → Doc.</th><th class="" data-key="DOC_ENVIADA">Doc. Enviada</th><th class="" data-key="CPF_APROVADO">CPF Aprov./Cond.<span class="arrow">▼</span></th><th class="" data-key="aprov_venda">Aprov. → Venda</th><th class="" data-key="vendas">Vendas</th><th class="" data-key="gap">Gap CPF</th><th class="" data-key="equipe_ativa">Equipe</th><th class="" data-key="equipe_produtiva">Equipe Prod.</th><th style="width:44px">Ações</th></tr></thead>
-        <tbody id="tableBody"><tr class="data-row " data-name="ANDERSON COSTA CARAPETA"><td class="rank">1</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ANDERSON COSTA CARAPETA</span></td><td class="mono">118</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">22,0%</span></td><td class="mono">26</td><td class="mono">20</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">10,0%</span></td><td class="mono">2</td><td class="mono gap-pos" style="font-weight:700;">+13</td><td class="mono">16</td><td class="mono">2</td><td><button class="btn-remove" data-remove="ANDERSON COSTA CARAPETA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="JULIO CESAR FERREIRA"><td class="rank">2</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JULIO CESAR FERREIRA</span></td><td class="mono">137</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">16,1%</span></td><td class="mono">22</td><td class="mono">17</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-pos" style="font-weight:700;">+10</td><td class="mono">18</td><td class="mono">0</td><td><button class="btn-remove" data-remove="JULIO CESAR FERREIRA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="ALEXANDRE MIRANDA DOS PASSOS"><td class="rank">3</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ALEXANDRE MIRANDA DOS PASSOS</span></td><td class="mono">217</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,5%</span></td><td class="mono">14</td><td class="mono">15</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">3</td><td class="mono gap-pos" style="font-weight:700;">+8</td><td class="mono">22</td><td class="mono">3</td><td><button class="btn-remove" data-remove="ALEXANDRE MIRANDA DOS PASSOS" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="ADALTON JOSE DA SILVA"><td class="rank">4</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ADALTON JOSE DA SILVA</span></td><td class="mono">177</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">9,6%</span></td><td class="mono">17</td><td class="mono">14</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-pos" style="font-weight:700;">+7</td><td class="mono">21</td><td class="mono">0</td><td><button class="btn-remove" data-remove="ADALTON JOSE DA SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="TIAGO AUGUSTO DA COSTA"><td class="rank">5</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TIAGO AUGUSTO DA COSTA</span></td><td class="mono">130</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">10,0%</span></td><td class="mono">13</td><td class="mono">9</td><td><span class="heat" style="background:rgba(238,116,71,0.16); color:rgb(148,64,43)">22,2%</span></td><td class="mono">2</td><td class="mono gap-pos" style="font-weight:700;">+2</td><td class="mono">14</td><td class="mono">2</td><td><button class="btn-remove" data-remove="TIAGO AUGUSTO DA COSTA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="JOEL TALMIR POPOWSKI"><td class="rank">6</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JOEL TALMIR POPOWSKI</span></td><td class="mono">214</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,7%</span></td><td class="mono">8</td><td class="mono">8</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">12,5%</span></td><td class="mono">1</td><td class="mono gap-pos" style="font-weight:700;">+1</td><td class="mono">12</td><td class="mono">1</td><td><button class="btn-remove" data-remove="JOEL TALMIR POPOWSKI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="FLAVIANO DE SOUZA CORREA"><td class="rank">7</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>FLAVIANO DE SOUZA CORREA</span></td><td class="mono">150</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,0%</span></td><td class="mono">12</td><td class="mono">6</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">3</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">13</td><td class="mono">3</td><td><button class="btn-remove" data-remove="FLAVIANO DE SOUZA CORREA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="HEITOR NEVES MANCUZO"><td class="rank">8</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>HEITOR NEVES MANCUZO</span></td><td class="mono">137</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,3%</span></td><td class="mono">10</td><td class="mono">6</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">16,7%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">15</td><td class="mono">1</td><td><button class="btn-remove" data-remove="HEITOR NEVES MANCUZO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="CAMILA REGINA MELCHIADES"><td class="rank">9</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>CAMILA REGINA MELCHIADES</span></td><td class="mono">23</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">52,2%</span></td><td class="mono">12</td><td class="mono">6</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">2</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">9</td><td class="mono">1</td><td><button class="btn-remove" data-remove="CAMILA REGINA MELCHIADES" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="GUSTAVO MACHADO TENORIO"><td class="rank">10</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO MACHADO TENORIO</span></td><td class="mono">118</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,6%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">23</td><td class="mono">0</td><td><button class="btn-remove" data-remove="GUSTAVO MACHADO TENORIO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="JAYRANE CAROLINE MARTINS FERRARI"><td class="rank">11</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JAYRANE CAROLINE MARTINS FERRARI</span></td><td class="mono">105</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,7%</span></td><td class="mono">6</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">14</td><td class="mono">1</td><td><button class="btn-remove" data-remove="JAYRANE CAROLINE MARTINS FERRARI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="PEDRO MORENO MARQUES"><td class="rank">12</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PEDRO MORENO MARQUES</span></td><td class="mono">134</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,7%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">11</td><td class="mono">1</td><td><button class="btn-remove" data-remove="PEDRO MORENO MARQUES" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="RAFAEL MOLL RECUPERO"><td class="rank">13</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>RAFAEL MOLL RECUPERO</span></td><td class="mono">193</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">4,1%</span></td><td class="mono">8</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">10</td><td class="mono">1</td><td><button class="btn-remove" data-remove="RAFAEL MOLL RECUPERO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="TIAGO ALVES CARVALHO COELHO"><td class="rank">14</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TIAGO ALVES CARVALHO COELHO</span></td><td class="mono">195</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,2%</span></td><td class="mono">14</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">14</td><td class="mono">1</td><td><button class="btn-remove" data-remove="TIAGO ALVES CARVALHO COELHO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="JEFERSON CRISTIANO REGHINI"><td class="rank">15</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JEFERSON CRISTIANO REGHINI</span></td><td class="mono">108</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,3%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">16</td><td class="mono">0</td><td><button class="btn-remove" data-remove="JEFERSON CRISTIANO REGHINI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="TAMIRIS ROCHA DE ANDRADE"><td class="rank">16</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TAMIRIS ROCHA DE ANDRADE</span></td><td class="mono">82</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">9,8%</span></td><td class="mono">8</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">6</td><td class="mono">0</td><td><button class="btn-remove" data-remove="TAMIRIS ROCHA DE ANDRADE" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="HEIDER APARECIDO MADEIRA"><td class="rank">17</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>HEIDER APARECIDO MADEIRA</span></td><td class="mono">57</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,8%</span></td><td class="mono">5</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">10</td><td class="mono">1</td><td><button class="btn-remove" data-remove="HEIDER APARECIDO MADEIRA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DAIANE CRISTINA JIRICO"><td class="rank">18</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DAIANE CRISTINA JIRICO</span></td><td class="mono">155</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,8%</span></td><td class="mono">9</td><td class="mono">4</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-3</td><td class="mono">20</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DAIANE CRISTINA JIRICO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="AMANDA STEFANY NEGOCIA CONCEICAO"><td class="rank">19</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>AMANDA STEFANY NEGOCIA CONCEICAO</span></td><td class="mono">194</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,2%</span></td><td class="mono">10</td><td class="mono">4</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-3</td><td class="mono">14</td><td class="mono">0</td><td><button class="btn-remove" data-remove="AMANDA STEFANY NEGOCIA CONCEICAO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="ALEXANDRE FORMIGA NETO"><td class="rank">20</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ALEXANDRE FORMIGA NETO</span></td><td class="mono">240</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">2,9%</span></td><td class="mono">7</td><td class="mono">3</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">16</td><td class="mono">1</td><td><button class="btn-remove" data-remove="ALEXANDRE FORMIGA NETO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="ANDREA CRISTINA MATHEUS FRATI"><td class="rank">21</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ANDREA CRISTINA MATHEUS FRATI</span></td><td class="mono">155</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,2%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">13</td><td class="mono">0</td><td><button class="btn-remove" data-remove="ANDREA CRISTINA MATHEUS FRATI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="EVANDRO DE BRITO"><td class="rank">22</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>EVANDRO DE BRITO</span></td><td class="mono">47</td><td><span class="heat" style="background:rgba(240,127,70,0.16); color:rgb(149,70,42)">10,6%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">18</td><td class="mono">0</td><td><button class="btn-remove" data-remove="EVANDRO DE BRITO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="MARCONE DA SILVA FERREIRA DE ANDRADE"><td class="rank">23</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MARCONE DA SILVA FERREIRA DE ANDRADE</span></td><td class="mono">153</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,3%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">13</td><td class="mono">1</td><td><button class="btn-remove" data-remove="MARCONE DA SILVA FERREIRA DE ANDRADE" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="GUSTAVO PAULINO SILVA"><td class="rank">24</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO PAULINO SILVA</span></td><td class="mono">89</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,7%</span></td><td class="mono">6</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">11</td><td class="mono">0</td><td><button class="btn-remove" data-remove="GUSTAVO PAULINO SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DANIELE DE CARVALHO"><td class="rank">25</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIELE DE CARVALHO</span></td><td class="mono">35</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,6%</span></td><td class="mono">3</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">14</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DANIELE DE CARVALHO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="GUSTAVO NUNES DA COSTA INACIO"><td class="rank">26</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO NUNES DA COSTA INACIO</span></td><td class="mono">100</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,0%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">11</td><td class="mono">0</td><td><button class="btn-remove" data-remove="GUSTAVO NUNES DA COSTA INACIO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="PAULO HENRIQUE QUINTILIANO"><td class="rank">27</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PAULO HENRIQUE QUINTILIANO</span></td><td class="mono">207</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,9%</span></td><td class="mono">8</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">14</td><td class="mono">0</td><td><button class="btn-remove" data-remove="PAULO HENRIQUE QUINTILIANO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DEIVES RODRIGO DA COSTA"><td class="rank">28</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DEIVES RODRIGO DA COSTA</span></td><td class="mono">60</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,0%</span></td><td class="mono">3</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">23</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DEIVES RODRIGO DA COSTA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="MAISA MUNIZ DA SILVA"><td class="rank">29</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MAISA MUNIZ DA SILVA</span></td><td class="mono">57</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,0%</span></td><td class="mono">4</td><td class="mono">2</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">9</td><td class="mono">1</td><td><button class="btn-remove" data-remove="MAISA MUNIZ DA SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="PHILLIPE CAMILLOTI GRACIANO"><td class="rank">30</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PHILLIPE CAMILLOTI GRACIANO</span></td><td class="mono">112</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,4%</span></td><td class="mono">6</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">14</td><td class="mono">0</td><td><button class="btn-remove" data-remove="PHILLIPE CAMILLOTI GRACIANO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="THAYNA LAIS DA SILVA"><td class="rank">31</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>THAYNA LAIS DA SILVA</span></td><td class="mono">134</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">2,2%</span></td><td class="mono">3</td><td class="mono">2</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">12</td><td class="mono">1</td><td><button class="btn-remove" data-remove="THAYNA LAIS DA SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DANIEL FAJARDO MONTANHANA"><td class="rank">32</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIEL FAJARDO MONTANHANA</span></td><td class="mono">27</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,4%</span></td><td class="mono">2</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">9</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DANIEL FAJARDO MONTANHANA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="REBECA PEREIRA BONFIM DA SILVA"><td class="rank">33</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>REBECA PEREIRA BONFIM DA SILVA</span></td><td class="mono">31</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,2%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">2</td><td class="mono">0</td><td><button class="btn-remove" data-remove="REBECA PEREIRA BONFIM DA SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="BARBARA FERRARI"><td class="rank">34</td><td><span class="reg-pill">SENSIA CP</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>BARBARA FERRARI</span></td><td class="mono">103</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">1,0%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">8</td><td class="mono">0</td><td><button class="btn-remove" data-remove="BARBARA FERRARI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="FABIO HENRIQUE VIDOTTI FERREIRA"><td class="rank">35</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>FABIO HENRIQUE VIDOTTI FERREIRA</span></td><td class="mono">55</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,3%</span></td><td class="mono">4</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">10</td><td class="mono">0</td><td><button class="btn-remove" data-remove="FABIO HENRIQUE VIDOTTI FERREIRA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DAIENE MUNARI IANNI"><td class="rank">36</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DAIENE MUNARI IANNI</span></td><td class="mono">92</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,3%</span></td><td class="mono">3</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">10</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DAIENE MUNARI IANNI" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="IGOR LEVA"><td class="rank">37</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>IGOR LEVA</span></td><td class="mono">305</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">1,0%</span></td><td class="mono">3</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">12</td><td class="mono">0</td><td><button class="btn-remove" data-remove="IGOR LEVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="NICOLLAS FREITAS SILVA"><td class="rank">38</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>NICOLLAS FREITAS SILVA</span></td><td class="mono">1</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">100,0%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">0</td><td class="mono">0</td><td><button class="btn-remove" data-remove="NICOLLAS FREITAS SILVA" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="ARMANDO DONIZETTI CUSTODIO"><td class="rank">39</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ARMANDO DONIZETTI CUSTODIO</span></td><td class="mono">88</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,4%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">17</td><td class="mono">0</td><td><button class="btn-remove" data-remove="ARMANDO DONIZETTI CUSTODIO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DOUGLAS MENDES DE AGUIAR RODRIGUES"><td class="rank">40</td><td><span class="reg-pill">SENSIA RP</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DOUGLAS MENDES DE AGUIAR RODRIGUES</span></td><td class="mono">16</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">10</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DOUGLAS MENDES DE AGUIAR RODRIGUES" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="CARLA MARIA NUNES"><td class="rank">41</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>CARLA MARIA NUNES</span></td><td class="mono">25</td><td><span class="heat" style="background:rgba(170,170,61,0.16); color:rgb(105,94,37)">12,0%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">7</td><td class="mono">0</td><td><button class="btn-remove" data-remove="CARLA MARIA NUNES" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="DANIELLE SEYR RIBEIRO"><td class="rank">42</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIELLE SEYR RIBEIRO</span></td><td class="mono">55</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,5%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">13</td><td class="mono">0</td><td><button class="btn-remove" data-remove="DANIELLE SEYR RIBEIRO" title="Remover gerente">×</button></td></tr><tr class="data-row " data-name="MAURICIO DOS SANTOS SILVA JUNIOR"><td class="rank">43</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MAURICIO DOS SANTOS SILVA JUNIOR</span></td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">5</td><td class="mono">0</td><td><button class="btn-remove" data-remove="MAURICIO DOS SANTOS SILVA JUNIOR" title="Remover gerente">×</button></td></tr></tbody>
+        <thead><tr id="tableHead"><th style="width:34px"></th><th class="" data-key="regional">Regional</th><th class="left" data-key="nome">Gerente</th><th class="" data-key="LEAD">Leads</th><th class="" data-key="lead_doc">Lead → Doc.</th><th class="" data-key="DOC_ENVIADA">Doc. Enviada</th><th class="" data-key="CPF_APROVADO">CPF Aprov./Cond.<span class="arrow">▼</span></th><th class="" data-key="aprov_venda">Aprov. → Venda</th><th class="" data-key="vendas">Vendas</th><th class="" data-key="gap">Gap CPF</th><th class="" data-key="equipe_ativa">Equipe</th><th class="" data-key="equipe_produtiva">Equipe Prod.</th></tr></thead>
+        <tbody id="tableBody"><tr class="data-row " data-name="ANDERSON COSTA CARAPETA"><td class="rank">1</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ANDERSON COSTA CARAPETA</span></td><td class="mono">118</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">22,0%</span></td><td class="mono">26</td><td class="mono">20</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">10,0%</span></td><td class="mono">2</td><td class="mono gap-pos" style="font-weight:700;">+13</td><td class="mono">16</td><td class="mono">2</td></tr><tr class="data-row " data-name="JULIO CESAR FERREIRA"><td class="rank">2</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JULIO CESAR FERREIRA</span></td><td class="mono">137</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">16,1%</span></td><td class="mono">22</td><td class="mono">17</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-pos" style="font-weight:700;">+10</td><td class="mono">18</td><td class="mono">0</td></tr><tr class="data-row " data-name="ALEXANDRE MIRANDA DOS PASSOS"><td class="rank">3</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ALEXANDRE MIRANDA DOS PASSOS</span></td><td class="mono">217</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,5%</span></td><td class="mono">14</td><td class="mono">15</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">3</td><td class="mono gap-pos" style="font-weight:700;">+8</td><td class="mono">22</td><td class="mono">3</td></tr><tr class="data-row " data-name="ADALTON JOSE DA SILVA"><td class="rank">4</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ADALTON JOSE DA SILVA</span></td><td class="mono">177</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">9,6%</span></td><td class="mono">17</td><td class="mono">14</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-pos" style="font-weight:700;">+7</td><td class="mono">21</td><td class="mono">0</td></tr><tr class="data-row " data-name="TIAGO AUGUSTO DA COSTA"><td class="rank">5</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TIAGO AUGUSTO DA COSTA</span></td><td class="mono">130</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">10,0%</span></td><td class="mono">13</td><td class="mono">9</td><td><span class="heat" style="background:rgba(238,116,71,0.16); color:rgb(148,64,43)">22,2%</span></td><td class="mono">2</td><td class="mono gap-pos" style="font-weight:700;">+2</td><td class="mono">14</td><td class="mono">2</td></tr><tr class="data-row " data-name="JOEL TALMIR POPOWSKI"><td class="rank">6</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JOEL TALMIR POPOWSKI</span></td><td class="mono">214</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,7%</span></td><td class="mono">8</td><td class="mono">8</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">12,5%</span></td><td class="mono">1</td><td class="mono gap-pos" style="font-weight:700;">+1</td><td class="mono">12</td><td class="mono">1</td></tr><tr class="data-row " data-name="FLAVIANO DE SOUZA CORREA"><td class="rank">7</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>FLAVIANO DE SOUZA CORREA</span></td><td class="mono">150</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,0%</span></td><td class="mono">12</td><td class="mono">6</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">3</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">13</td><td class="mono">3</td></tr><tr class="data-row " data-name="HEITOR NEVES MANCUZO"><td class="rank">8</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>HEITOR NEVES MANCUZO</span></td><td class="mono">137</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,3%</span></td><td class="mono">10</td><td class="mono">6</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">16,7%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">15</td><td class="mono">1</td></tr><tr class="data-row " data-name="CAMILA REGINA MELCHIADES"><td class="rank">9</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>CAMILA REGINA MELCHIADES</span></td><td class="mono">23</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">52,2%</span></td><td class="mono">12</td><td class="mono">6</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">2</td><td class="mono gap-neg" style="font-weight:700;">-1</td><td class="mono">9</td><td class="mono">1</td></tr><tr class="data-row " data-name="GUSTAVO MACHADO TENORIO"><td class="rank">10</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO MACHADO TENORIO</span></td><td class="mono">118</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,6%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">23</td><td class="mono">0</td></tr><tr class="data-row " data-name="JAYRANE CAROLINE MARTINS FERRARI"><td class="rank">11</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JAYRANE CAROLINE MARTINS FERRARI</span></td><td class="mono">105</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,7%</span></td><td class="mono">6</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">14</td><td class="mono">1</td></tr><tr class="data-row " data-name="PEDRO MORENO MARQUES"><td class="rank">12</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PEDRO MORENO MARQUES</span></td><td class="mono">134</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,7%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">11</td><td class="mono">1</td></tr><tr class="data-row " data-name="RAFAEL MOLL RECUPERO"><td class="rank">13</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>RAFAEL MOLL RECUPERO</span></td><td class="mono">193</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">4,1%</span></td><td class="mono">8</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">10</td><td class="mono">1</td></tr><tr class="data-row " data-name="TIAGO ALVES CARVALHO COELHO"><td class="rank">14</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TIAGO ALVES CARVALHO COELHO</span></td><td class="mono">195</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,2%</span></td><td class="mono">14</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">14</td><td class="mono">1</td></tr><tr class="data-row " data-name="JEFERSON CRISTIANO REGHINI"><td class="rank">15</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>JEFERSON CRISTIANO REGHINI</span></td><td class="mono">108</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,3%</span></td><td class="mono">9</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">16</td><td class="mono">0</td></tr><tr class="data-row " data-name="TAMIRIS ROCHA DE ANDRADE"><td class="rank">16</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>TAMIRIS ROCHA DE ANDRADE</span></td><td class="mono">82</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">9,8%</span></td><td class="mono">8</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">6</td><td class="mono">0</td></tr><tr class="data-row " data-name="HEIDER APARECIDO MADEIRA"><td class="rank">17</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>HEIDER APARECIDO MADEIRA</span></td><td class="mono">57</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,8%</span></td><td class="mono">5</td><td class="mono">5</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">20,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-2</td><td class="mono">10</td><td class="mono">1</td></tr><tr class="data-row " data-name="DAIANE CRISTINA JIRICO"><td class="rank">18</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DAIANE CRISTINA JIRICO</span></td><td class="mono">155</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,8%</span></td><td class="mono">9</td><td class="mono">4</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-3</td><td class="mono">20</td><td class="mono">0</td></tr><tr class="data-row " data-name="AMANDA STEFANY NEGOCIA CONCEICAO"><td class="rank">19</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>AMANDA STEFANY NEGOCIA CONCEICAO</span></td><td class="mono">194</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,2%</span></td><td class="mono">10</td><td class="mono">4</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-3</td><td class="mono">14</td><td class="mono">0</td></tr><tr class="data-row " data-name="ALEXANDRE FORMIGA NETO"><td class="rank">20</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ALEXANDRE FORMIGA NETO</span></td><td class="mono">240</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">2,9%</span></td><td class="mono">7</td><td class="mono">3</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">16</td><td class="mono">1</td></tr><tr class="data-row " data-name="ANDREA CRISTINA MATHEUS FRATI"><td class="rank">21</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ANDREA CRISTINA MATHEUS FRATI</span></td><td class="mono">155</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,2%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">13</td><td class="mono">0</td></tr><tr class="data-row " data-name="EVANDRO DE BRITO"><td class="rank">22</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>EVANDRO DE BRITO</span></td><td class="mono">47</td><td><span class="heat" style="background:rgba(240,127,70,0.16); color:rgb(149,70,42)">10,6%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">18</td><td class="mono">0</td></tr><tr class="data-row " data-name="MARCONE DA SILVA FERREIRA DE ANDRADE"><td class="rank">23</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MARCONE DA SILVA FERREIRA DE ANDRADE</span></td><td class="mono">153</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,3%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">33,3%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">13</td><td class="mono">1</td></tr><tr class="data-row " data-name="GUSTAVO PAULINO SILVA"><td class="rank">24</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO PAULINO SILVA</span></td><td class="mono">89</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">6,7%</span></td><td class="mono">6</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">11</td><td class="mono">0</td></tr><tr class="data-row " data-name="DANIELE DE CARVALHO"><td class="rank">25</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIELE DE CARVALHO</span></td><td class="mono">35</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">8,6%</span></td><td class="mono">3</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">14</td><td class="mono">0</td></tr><tr class="data-row " data-name="GUSTAVO NUNES DA COSTA INACIO"><td class="rank">26</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>GUSTAVO NUNES DA COSTA INACIO</span></td><td class="mono">100</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,0%</span></td><td class="mono">5</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">11</td><td class="mono">0</td></tr><tr class="data-row " data-name="PAULO HENRIQUE QUINTILIANO"><td class="rank">27</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PAULO HENRIQUE QUINTILIANO</span></td><td class="mono">207</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,9%</span></td><td class="mono">8</td><td class="mono">3</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-4</td><td class="mono">14</td><td class="mono">0</td></tr><tr class="data-row " data-name="DEIVES RODRIGO DA COSTA"><td class="rank">28</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DEIVES RODRIGO DA COSTA</span></td><td class="mono">60</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,0%</span></td><td class="mono">3</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">23</td><td class="mono">0</td></tr><tr class="data-row " data-name="MAISA MUNIZ DA SILVA"><td class="rank">29</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MAISA MUNIZ DA SILVA</span></td><td class="mono">57</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,0%</span></td><td class="mono">4</td><td class="mono">2</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">9</td><td class="mono">1</td></tr><tr class="data-row " data-name="PHILLIPE CAMILLOTI GRACIANO"><td class="rank">30</td><td><span class="reg-pill">SP INT 6</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>PHILLIPE CAMILLOTI GRACIANO</span></td><td class="mono">112</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,4%</span></td><td class="mono">6</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">14</td><td class="mono">0</td></tr><tr class="data-row " data-name="THAYNA LAIS DA SILVA"><td class="rank">31</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>THAYNA LAIS DA SILVA</span></td><td class="mono">134</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">2,2%</span></td><td class="mono">3</td><td class="mono">2</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">50,0%</span></td><td class="mono">1</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">12</td><td class="mono">1</td></tr><tr class="data-row " data-name="DANIEL FAJARDO MONTANHANA"><td class="rank">32</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIEL FAJARDO MONTANHANA</span></td><td class="mono">27</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,4%</span></td><td class="mono">2</td><td class="mono">2</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-5</td><td class="mono">9</td><td class="mono">0</td></tr><tr class="data-row " data-name="REBECA PEREIRA BONFIM DA SILVA"><td class="rank">33</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>REBECA PEREIRA BONFIM DA SILVA</span></td><td class="mono">31</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,2%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">2</td><td class="mono">0</td></tr><tr class="data-row " data-name="BARBARA FERRARI"><td class="rank">34</td><td><span class="reg-pill">SENSIA CP</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>BARBARA FERRARI</span></td><td class="mono">103</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">1,0%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">8</td><td class="mono">0</td></tr><tr class="data-row " data-name="FABIO HENRIQUE VIDOTTI FERREIRA"><td class="rank">35</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>FABIO HENRIQUE VIDOTTI FERREIRA</span></td><td class="mono">55</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">7,3%</span></td><td class="mono">4</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">10</td><td class="mono">0</td></tr><tr class="data-row " data-name="DAIENE MUNARI IANNI"><td class="rank">36</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DAIENE MUNARI IANNI</span></td><td class="mono">92</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,3%</span></td><td class="mono">3</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">10</td><td class="mono">0</td></tr><tr class="data-row " data-name="IGOR LEVA"><td class="rank">37</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>IGOR LEVA</span></td><td class="mono">305</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">1,0%</span></td><td class="mono">3</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">12</td><td class="mono">0</td></tr><tr class="data-row " data-name="NICOLLAS FREITAS SILVA"><td class="rank">38</td><td><span class="reg-pill">SP INT 2</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>NICOLLAS FREITAS SILVA</span></td><td class="mono">1</td><td><span class="heat" style="background:rgba(0,107,63,0.16); color:rgb(0,59,38)">100,0%</span></td><td class="mono">1</td><td class="mono">1</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-6</td><td class="mono">0</td><td class="mono">0</td></tr><tr class="data-row " data-name="ARMANDO DONIZETTI CUSTODIO"><td class="rank">39</td><td><span class="reg-pill">SP INT 3</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>ARMANDO DONIZETTI CUSTODIO</span></td><td class="mono">88</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">3,4%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">17</td><td class="mono">0</td></tr><tr class="data-row " data-name="DOUGLAS MENDES DE AGUIAR RODRIGUES"><td class="rank">40</td><td><span class="reg-pill">SENSIA RP</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DOUGLAS MENDES DE AGUIAR RODRIGUES</span></td><td class="mono">16</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">0,0%</span></td><td class="mono">0</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">10</td><td class="mono">0</td></tr><tr class="data-row " data-name="CARLA MARIA NUNES"><td class="rank">41</td><td><span class="reg-pill">SP INT 4</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>CARLA MARIA NUNES</span></td><td class="mono">25</td><td><span class="heat" style="background:rgba(170,170,61,0.16); color:rgb(105,94,37)">12,0%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">7</td><td class="mono">0</td></tr><tr class="data-row " data-name="DANIELLE SEYR RIBEIRO"><td class="rank">42</td><td><span class="reg-pill">SP INT 5</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>DANIELLE SEYR RIBEIRO</span></td><td class="mono">55</td><td><span class="heat" style="background:rgba(229,72,77,0.16); color:rgb(142,40,46)">5,5%</span></td><td class="mono">3</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">13</td><td class="mono">0</td></tr><tr class="data-row " data-name="MAURICIO DOS SANTOS SILVA JUNIOR"><td class="rank">43</td><td><span class="reg-pill">SP INT 1</span></td><td class="left"><span class="name-row"><span class="caret">▶</span>MAURICIO DOS SANTOS SILVA JUNIOR</span></td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono">0</td><td><span class="heat" style="background:#F1F3F1; color:#8A968E">—</span></td><td class="mono">0</td><td class="mono gap-neg" style="font-weight:700;">-7</td><td class="mono">5</td><td class="mono">0</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -410,15 +488,48 @@ const RAW_READY = (async function loadRemoteData(){
 })();
 
 /* ============================================================
-   APP INITIALIZATION
+   EMAIL GATE LOGIC
 =============================================================*/
-(async function startApp(){
-  const loaded = await RAW_READY;
-  RAW = loaded.data;
-  window.__DATA_SOURCE__ = loaded;
-  STAGES = RAW.stages;
-  LABELS = RAW.stage_labels;
-  initApp();
+(function(){
+  const overlay = document.getElementById('gateOverlay');
+  const blocked = document.getElementById('gateBlocked');
+  const appRoot = document.getElementById('appRoot');
+  const emailInput = document.getElementById('gateEmail');
+  const errorEl = document.getElementById('gateError');
+  const submitBtn = document.getElementById('gateSubmit');
+
+  async function tryEnter(){
+    const val = (emailInput.value || '').trim().toLowerCase();
+    if(!val){
+      errorEl.textContent = 'Informe um e-mail para continuar.';
+      return;
+    }
+    if(val.endsWith('@mrv.com.br')){
+      const originalLabel = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Carregando dados...';
+      const loaded = await RAW_READY;
+      RAW = loaded.data;
+      window.__DATA_SOURCE__ = loaded; // usado pelo initApp() para mostrar a origem dos dados
+      STAGES = RAW.stages;
+      LABELS = RAW.stage_labels;
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalLabel;
+      overlay.style.display = 'none';
+      appRoot.style.display = 'block';
+      initApp();
+    } else {
+      overlay.style.display = 'none';
+      blocked.style.display = 'flex';
+      setTimeout(()=>{
+        window.close();
+        // fallback caso o navegador bloqueie o fechamento de aba
+        blocked.querySelector('p').textContent = 'Este e-mail não tem permissão para acessar o painel. Feche esta aba para sair.';
+      }, 900);
+    }
+  }
+  submitBtn.addEventListener('click', tryEnter);
+  emailInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryEnter(); });
 })();
 
 /* ============================================================
@@ -431,7 +542,6 @@ let sortDir = -1;
 let expandedRow = null;
 let regionalFilter = 'ALL';
 let searchTerm = '';
-let removedNames = { house: new Set(), imob: new Set() };
 
 // meta = dia atual - 1
 const today = new Date();
@@ -536,17 +646,7 @@ function limitName(fullName, maxWords){
   maxWords = maxWords || 3;
   const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
   if(parts.length <= maxWords) return fullName;
-  
-  let limit = maxWords;
-  const preposicoes = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
-  
-  // Se a última palavra dentro do limite for uma preposição, 
-  // avançamos 1 palavra a mais para incluir o sobrenome real.
-  if (preposicoes.has(parts[limit - 1].toLowerCase()) && parts.length > limit) {
-    limit++;
-  }
-  
-  return parts.slice(0, limit).join(' ');
+  return parts.slice(0, maxWords).join(' ');
 }
 
 // heatmap com pontos de corte assimétricos: <=redMax vermelho puro, >=greenMin verde puro,
@@ -662,7 +762,7 @@ function renderTable(rows){
     let arrow = '';
     if(sortKey===c.key) arrow = `<span class="arrow">${sortDir===1?'▲':'▼'}</span>`;
     return `<th class="${c.left?'left':''}" data-key="${c.key}">${c.label}${arrow}</th>`;
-  }).join('') + '<th style="width:44px">Ações</th>';
+  }).join('');
 
   head.querySelectorAll('th[data-key]').forEach(th=>{
     th.addEventListener('click', ()=>{
@@ -712,33 +812,18 @@ function renderTable(rows){
         html += `<td class="mono">${c.render(r)}</td>`;
       }
     });
-    html += `<td><button class="btn-remove" data-remove="${r.nome}" title="Remover ${CANAL==='house'?'gerente':'supervisor'}">×</button></td>`;
     html += `</tr>`;
     if(isExpanded){
-      html += renderDetailRow(r, cols.length+2);
+      html += renderDetailRow(r, cols.length+1);
     }
   });
   body.innerHTML = html;
 
   body.querySelectorAll('tr.data-row').forEach(tr=>{
-    tr.addEventListener('click', (ev)=>{
-      if(ev.target.closest('.btn-remove')) return;
+    tr.addEventListener('click', ()=>{
       const name = tr.dataset.name;
       expandedRow = expandedRow === name ? null : name;
       renderTable(getFilteredRows());
-    });
-  });
-
-  body.querySelectorAll('.btn-remove').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      ev.stopPropagation();
-      const name = btn.dataset.remove;
-      const tipo = CANAL==='house' ? 'gerente' : 'supervisor';
-      if(confirm(`Remover o ${tipo} "${name}" deste painel?`)){
-        removedNames[CANAL].add(name);
-        if(expandedRow===name) expandedRow=null;
-        renderAll();
-      }
     });
   });
 
@@ -957,10 +1042,7 @@ function getActiveRows(baseCanal){
   const prevMonth = PREV_3_MONTHS[2]; // Pega automaticamente o mês anterior ao atual
 
   return getMonthRows(baseCanal, CURRENT_MONTH).filter(r => {
-    // 1. Remove os que foram ocultados manualmente no (x)
-    if(removedNames[baseCanal].has(r.nome)) return false;
-
-    // 1b. Remove os ocultados permanentemente no código (ver HIDDEN_NAMES acima)
+    // 1. Remove os ocultados permanentemente no código (ver HIDDEN_NAMES acima)
     if(isHiddenByCode(baseCanal, r.nome)) return false;
 
     // 2. Busca o histórico da pessoa
@@ -991,7 +1073,6 @@ function getFilteredRows(){
    MAIN RENDER
 =============================================================*/
 function renderAll(){
-  const restoreField = document.getElementById('restoreField');
   const filterBar = document.getElementById('filterBar');
 
   if(CANAL === 'rank_house' || CANAL === 'rank_imob'){
@@ -1000,22 +1081,11 @@ function renderAll(){
       (baseCanal==='house' ? 'Ranking de Gerentes — Canal House' : 'Ranking de Supervisores — Canal Imob')
       + ` · Mês vigente: ${monthLabel(CURRENT_MONTH)} · ranqueado por CPF Aprov./Cond.`;
     filterBar.style.display = 'none';
-    restoreField.style.display = 'none';
     document.getElementById('btnCopyImage').style.display = 'inline-flex';
     renderRankScreen(baseCanal);
-
-    const rankRestoreBar = document.getElementById('rankRestoreBar');
-    const removedCountRank = removedNames[baseCanal].size;
-    if(removedCountRank > 0){
-      rankRestoreBar.style.display = 'block';
-      document.getElementById('btnRestoreRank').textContent = `↺ Restaurar ${removedCountRank} removido${removedCountRank>1?'s':''}`;
-    } else {
-      rankRestoreBar.style.display = 'none';
-    }
     return;
   }
 
-  document.getElementById('rankRestoreBar').style.display = 'none';
   document.getElementById('btnCopyImage').style.display = 'none';
   filterBar.style.display = 'flex';
   document.getElementById('subLabel').textContent = (CANAL==='house'
@@ -1027,14 +1097,6 @@ function renderAll(){
   renderTable(rows);
   document.getElementById('metaInput').value = meta;
   document.getElementById('metaNote').textContent = `Meta automática: dia atual (${today.getDate()}) − 1`;
-
-  const removedCount = removedNames[CANAL].size;
-  if(removedCount > 0){
-    restoreField.style.display = 'flex';
-    document.getElementById('btnRestore').textContent = `↺ Restaurar ${removedCount} removido${removedCount>1?'s':''}`;
-  } else {
-    restoreField.style.display = 'none';
-  }
 }
 
 /* ============================================================
@@ -1058,6 +1120,17 @@ const FUNNEL_MAP = {
   'REGISTRO':'REGISTRO',
 };
 
+// Schema fixo das etapas do funil, usado DENTRO do parseWorkbook.
+// Importante: isto é independente da variável global STAGES (que só é
+// preenchida depois do login) — parseWorkbook pode ser chamado antes
+// disso, durante o carregamento automático do .xlsx do GitHub.
+const STAGE_KEYS = ['LEAD','DOC_ENVIADA','DOC_ANALISE','CPF_ANALISADO','CPF_APROVADO','CONTRATO_GERADO','CONTRATO_ASSINADO','REPASSE','GANHO','REGISTRO'];
+const STAGE_LABELS_STATIC = {
+  LEAD:'Lead', DOC_ENVIADA:'Doc. Enviada', DOC_ANALISE:'Doc. em Análise',
+  CPF_ANALISADO:'CPF Analisado', CPF_APROVADO:'CPF Aprov./Cond.',
+  CONTRATO_GERADO:'Contrato Gerado', CONTRATO_ASSINADO:'Contrato Assinado',
+  REPASSE:'Repasse', GANHO:'Ganho', REGISTRO:'Registro'
+};
 
 const MESES_ABREV_JS = {jan:'01',fev:'02',mar:'03',abr:'04',mai:'05',jun:'06',jul:'07',ago:'08',set:'09',out:'10',nov:'11',dez:'12'};
 function normFull(dateStr){
@@ -1070,15 +1143,6 @@ function normAbbr(s){
   const [mmm,y] = s.split('/');
   return `${y}-${MESES_ABREV_JS[mmm.trim().toLowerCase()]}`;
 }
-
-// Schema fixo das etapas do funil
-const STAGE_KEYS = ['LEAD','DOC_ENVIADA','DOC_ANALISE','CPF_ANALISADO','CPF_APROVADO','CONTRATO_GERADO','CONTRATO_ASSINADO','REPASSE','GANHO','REGISTRO'];
-const STAGE_LABELS_STATIC = {
-  LEAD:'Lead', DOC_ENVIADA:'Doc. Enviada', DOC_ANALISE:'Doc. em Análise',
-  CPF_ANALISADO:'CPF Analisado', CPF_APROVADO:'CPF Aprov./Cond.',
-  CONTRATO_GERADO:'Contrato Gerado', CONTRATO_ASSINADO:'Contrato Assinado',
-  REPASSE:'Repasse', GANHO:'Ganho', REGISTRO:'Registro'
-};
 
 function parseWorkbook(ab){
   const wb = XLSX.read(ab, {type:'array'});
@@ -1304,8 +1368,28 @@ function initApp(){
   }
   document.getElementById('btnHouse').addEventListener('click', ()=> setCanal('house','btnHouse'));
   document.getElementById('btnImob').addEventListener('click', ()=> setCanal('imob','btnImob'));
-  document.getElementById('btnRankHouse').addEventListener('click', ()=> setCanal('rank_house','btnRankHouse'));
-  document.getElementById('btnRankImob').addEventListener('click', ()=> setCanal('rank_imob','btnRankImob'));
+
+  // Rankings ficam escondidos atrás do botão "⋮" no canto superior
+  // direito — só aparecem se a pessoa clicar nele.
+  const rankingMenu = document.getElementById('rankingMenu');
+  const btnRankingMenu = document.getElementById('btnRankingMenu');
+  btnRankingMenu.addEventListener('click', (ev)=>{
+    ev.stopPropagation();
+    rankingMenu.classList.toggle('show');
+  });
+  document.addEventListener('click', (ev)=>{
+    if(rankingMenu.classList.contains('show') && !rankingMenu.contains(ev.target) && ev.target !== btnRankingMenu){
+      rankingMenu.classList.remove('show');
+    }
+  });
+  document.getElementById('btnRankHouse').addEventListener('click', ()=>{
+    setCanal('rank_house','btnRankHouse');
+    rankingMenu.classList.remove('show');
+  });
+  document.getElementById('btnRankImob').addEventListener('click', ()=>{
+    setCanal('rank_imob','btnRankImob');
+    rankingMenu.classList.remove('show');
+  });
   document.getElementById('searchInput').addEventListener('input', (e)=>{
     searchTerm = e.target.value; expandedRow=null; renderAll();
   });
@@ -1314,16 +1398,6 @@ function initApp(){
   });
   document.getElementById('btnUpload').addEventListener('click', ()=> document.getElementById('fileInput').click());
   document.getElementById('btnCopyImage').addEventListener('click', copyRankingImage);
-  document.getElementById('btnRestore').addEventListener('click', ()=>{
-    const baseKey = (CANAL === 'rank_house') ? 'house' : (CANAL === 'rank_imob') ? 'imob' : CANAL;
-    removedNames[baseKey].clear();
-    renderAll();
-  });
-  document.getElementById('btnRestoreRank').addEventListener('click', ()=>{
-    const baseKey = (CANAL === 'rank_house') ? 'house' : (CANAL === 'rank_imob') ? 'imob' : CANAL;
-    removedNames[baseKey].clear();
-    renderAll();
-  });
   document.getElementById('fileInput').addEventListener('change', (e)=>{
     const file = e.target.files[0];
     if(!file) return;
