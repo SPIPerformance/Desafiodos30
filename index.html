@@ -594,6 +594,7 @@ function flattenEntry(entry, monthKey, isHouse){
     row.vendas = (entry.vendas_por_mes && entry.vendas_por_mes[monthKey]) || 0;
     row.equipe_produtiva = (entry.produtivos_por_mes && entry.produtivos_por_mes[monthKey]) || 0;
     row.corretores = (entry.corretores_por_mes && entry.corretores_por_mes[monthKey]) || [];
+    row.corretor_funil = (entry.corretor_funil_por_mes && entry.corretor_funil_por_mes[monthKey]) || {};
   } else {
     row.vendas = (entry.vendas_por_mes && entry.vendas_por_mes[monthKey]) || 0;
   }
@@ -910,6 +911,103 @@ function renderVerticalFunnel(r){
   return html;
 }
 
+/* ============================================================
+   ANÁLISE DE CORRETORES DETRATORES (GAP)
+   Usa os números REAIS do funil por corretor (Lead, Doc. Enviada,
+   CPF Aprov./Cond.) que agora vêm da própria planilha, mais as
+   vendas reais (mesma fonte usada no resto do painel). Não é mais
+   estimativa: são os números de cada corretor, de verdade.
+
+   - Gap inicial: muitos leads, poucas docs (conversão Lead→Doc ruim)
+   - Gap final: docs/CPF ok, poucas vendas (conversão Aprov.→Venda ruim)
+
+   Os limites (10% e 20%) são os MESMOS já usados no heatmap da
+   tabela principal (colunas "Lead → Doc." e "Aprov. → Venda"), pra
+   manter o critério de "abaixo do esperado" consistente no painel
+   inteiro.
+=============================================================*/
+const GAP_MIN_LEADS = 5;   // amostra mínima de leads pra avaliar conversão inicial
+const GAP_MIN_CPF = 2;     // amostra mínima de CPF aprovado pra avaliar conversão final
+const GAP_LEAD_DOC_THRESHOLD = 10;   // % — mesmo corte "vermelho" da coluna Lead → Doc.
+const GAP_APROV_VENDA_THRESHOLD = 20; // % — mesmo corte "vermelho" da coluna Aprov. → Venda
+
+function analyzeCorrelorGaps(r){
+  if(CANAL !== 'house' || !r.corretor_funil) return [];
+
+  // Mapa nome -> vendas reais do corretor (mesma fonte usada na
+  // tabela "Corretores produtivos" logo acima)
+  const vendasPorNome = {};
+  (r.corretores || []).forEach(c=>{ vendasPorNome[c.nome] = (vendasPorNome[c.nome]||0) + c.vendas; });
+
+  const gaps = [];
+  Object.keys(r.corretor_funil).forEach(nome=>{
+    const f = r.corretor_funil[nome];
+    const leads = f.LEAD || 0;
+    const docs = f.DOC_ENVIADA || 0;
+    const cpfAprov = f.CPF_APROVADO || 0;
+    const vendas = vendasPorNome[nome] || 0;
+
+    const leadDocRate = leads > 0 ? (docs / leads) * 100 : null;
+    const aprovVendaRate = cpfAprov > 0 ? (vendas / cpfAprov) * 100 : null;
+
+    const gapInicial = leads >= GAP_MIN_LEADS && leadDocRate !== null && leadDocRate < GAP_LEAD_DOC_THRESHOLD;
+    const gapFinal = cpfAprov >= GAP_MIN_CPF && aprovVendaRate !== null && aprovVendaRate < GAP_APROV_VENDA_THRESHOLD;
+
+    if(gapInicial || gapFinal){
+      gaps.push({ nome, leads, docs, cpfAprov, vendas, leadDocRate, aprovVendaRate, gapInicial, gapFinal });
+    }
+  });
+
+  // Prioriza quem tem mais leads (maior impacto na equipe), depois pela pior taxa
+  gaps.sort((a,b)=> b.leads - a.leads);
+  return gaps.slice(0, 8);
+}
+
+function renderCorrelorGaps(r){
+  const gaps = analyzeCorrelorGaps(r);
+  if(gaps.length === 0) return '';
+
+  function tag(label, kind){
+    const bg = kind==='inicial' ? '#FFF3CD' : '#F8D7DA';
+    const fg = kind==='inicial' ? '#856404' : '#721C24';
+    return `<span style="background:${bg}; color:${fg}; padding:2px 6px; border-radius:4px; font-weight:700; font-size:9.5px; white-space:nowrap; display:inline-block; margin:1px 3px 1px 0;">${label}</span>`;
+  }
+
+  return `
+    <div class="corretor-wrap" style="margin-top:16px;">
+      <div class="funnel-title" style="margin-bottom:4px;">⚠️ Corretores com GAP no funil</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">
+        Números reais do funil de cada corretor · vermelho = abaixo do esperado (mesmo critério do heatmap acima)
+      </div>
+      <table class="corretor-table">
+        <thead><tr>
+          <th style="width:26%">Corretor</th>
+          <th style="width:12%; text-align:right">Leads</th>
+          <th style="width:12%; text-align:right">Docs</th>
+          <th style="width:13%; text-align:right">CPF Apr.</th>
+          <th style="width:11%; text-align:right">Vendas</th>
+          <th style="width:26%">Gap</th>
+        </tr></thead>
+        <tbody>
+          ${gaps.map(g => `
+            <tr>
+              <td style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${g.nome}">${shortName(g.nome)}</td>
+              <td class="mono" style="text-align:right;">${fmtInt(g.leads)}</td>
+              <td class="mono" style="text-align:right;">${fmtInt(g.docs)}</td>
+              <td class="mono" style="text-align:right;">${fmtInt(g.cpfAprov)}</td>
+              <td class="mono" style="text-align:right;">${fmtInt(g.vendas)}</td>
+              <td>
+                ${g.gapInicial ? tag(`Lead→Doc ${fmtPct(g.leadDocRate)}`, 'inicial') : ''}
+                ${g.gapFinal ? tag(`Aprov.→Venda ${fmtPct(g.aprovVendaRate)}`, 'final') : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function renderDetailRow(r, colspan){
   const convOut = pct(r.vendas, r.CPF_APROVADO);
 
@@ -937,6 +1035,7 @@ function renderDetailRow(r, colspan){
           </tbody>
         </table>` : `<div style="font-size:12px; color:var(--muted);">Nenhum corretor produtivo registrado no período.</div>`}
       </div>
+      ${renderCorrelorGaps(r)}
     `;
   } else {
     topStatsHtml = `
@@ -1167,8 +1266,8 @@ function parseWorkbook(ab){
 
   const grid = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
 
-  // Layout: C=data_base, D=canal_loja, E=gerente, F=supervisor_imob, G=status_funil, H=regional, I=Funil_Real
-  const C=2,D=3,E=4,F=5,G=6,H=7,I=8;
+  // Layout: C=data_base, D=canal_loja, E=gerente, F=supervisor_imob, G=nom_corretor, H=status_funil, I=regional, J=Funil_Real
+  const C=2,D=3,E=4,F=5,G=6,H=7,I=8,J=9;
   // M=DataBase, N=regional_co, O=nom_gerente, P=TotalCorretores, Q=TotalCorretoresMais10DiasSemLogin
   const M=12,N=13,O=14,P=15,Q=16;
   // R=DataBaseAssinaturaContratoSalesforce, S=NomeGerente, T=NomeCorretor, U=NomeLoja, V=# Vendas
@@ -1178,6 +1277,17 @@ function parseWorkbook(ab){
   const imob = {};
   function ensure(map, name){ if(!map[name]) map[name] = {regional:null, months:{}}; return map[name]; }
   function ensureMonth(entry, mk){ if(!entry.months[mk]) entry.months[mk] = {}; STAGE_KEYS.forEach(s=>{ if(entry.months[mk][s]===undefined) entry.months[mk][s]=0; }); return entry.months[mk]; }
+  // Funil por corretor (mês -> nome do corretor -> {LEAD, DOC_ENVIADA, ...}).
+  // Só é preenchido pra HOUSE, que é onde a análise de GAP é usada.
+  function ensureCorretorFunilMonth(entry, mk, corretorNome){
+    if(!entry.corretor_funil_por_mes) entry.corretor_funil_por_mes = {};
+    if(!entry.corretor_funil_por_mes[mk]) entry.corretor_funil_por_mes[mk] = {};
+    if(!entry.corretor_funil_por_mes[mk][corretorNome]){
+      entry.corretor_funil_por_mes[mk][corretorNome] = {};
+      STAGE_KEYS.forEach(s=>{ entry.corretor_funil_por_mes[mk][corretorNome][s] = 0; });
+    }
+    return entry.corretor_funil_por_mes[mk][corretorNome];
+  }
 
   for(let r=8; r<grid.length; r++){
     const row = grid[r] || [];
@@ -1185,9 +1295,10 @@ function parseWorkbook(ab){
     const canal = row[D];
     const gerente = row[E];
     const supervisor = row[F];
-    const status = row[G];
-    const regional = row[H];
-    const valor = row[I] || 0;
+    const corretorNome = row[G];
+    const status = row[H];
+    const regional = row[I];
+    const valor = row[J] || 0;
     if(!dateRaw || dateRaw === 'Total Geral') continue;
     if(!status || !(status in FUNNEL_MAP)) continue;
     const mk = normFull(dateRaw);
@@ -1195,6 +1306,10 @@ function parseWorkbook(ab){
     if(canal === 'HOUSE' && gerente){
       const o = ensure(house, gerente); o.regional = regional;
       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
+      if(corretorNome){
+        const cm = ensureCorretorFunilMonth(o, mk, corretorNome);
+        cm[stage] = (cm[stage]||0) + valor;
+      }
     } else if(canal === 'IMOB' && supervisor){
       const o = ensure(imob, supervisor); o.regional = regional;
       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
@@ -1267,6 +1382,7 @@ function parseWorkbook(ab){
         entry.vendas_por_mes = vendasPorGerenteMes[name] || {};
         entry.produtivos_por_mes = produtivosPorGerenteMes[name] || {};
         entry.corretores_por_mes = corretoresPorGerenteMes[name] || {};
+        entry.corretor_funil_por_mes = info.corretor_funil_por_mes || {};
       } else {
         entry.vendas_por_mes = vendasPorNomeMes[name] || {};
       }
