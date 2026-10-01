@@ -342,10 +342,15 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
       <div class="top-actions">
-        <div class="canal-toggle">
+<div class="canal-toggle">
           <button id="btnHouse" class="">Canal House</button>
           <button id="btnImob" class="active">Canal Imob</button>
         </div>
+        
+        <!-- NOVO: Seletor de Mês -->
+        <select id="monthSelector" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#fff; font-size:13px; font-weight:600; padding:9px 12px; border-radius:8px; cursor:pointer; font-family:'Inter'; outline:none;">
+        </select>
+        
         <button class="btn-ghost" id="btnUpload">
           <span class="funnel-glyph"><span style="height:6px"></span><span style="height:11px"></span><span style="height:16px"></span></span>
           Atualizar planilha (teste local)
@@ -570,8 +575,8 @@ function monthLabel(monthKey){
   return `${MESES_PT[m-1].charAt(0).toUpperCase()+MESES_PT[m-1].slice(1)}/${y}`;
 }
 
-const CURRENT_MONTH = monthKeyFromDate(today);
-const PREV_3_MONTHS = [addMonths(CURRENT_MONTH,-3), addMonths(CURRENT_MONTH,-2), addMonths(CURRENT_MONTH,-1)];
+let CURRENT_MONTH = monthKeyFromDate(today);
+let PREV_3_MONTHS = [addMonths(CURRENT_MONTH,-3), addMonths(CURRENT_MONTH,-2), addMonths(CURRENT_MONTH,-1)];
 
 /* ============================================================
    Converte uma "entry" (estrutura aninhada por mês) em uma linha
@@ -1542,7 +1547,43 @@ function initApp(){
     };
     reader.readAsArrayBuffer(file);
   });
+// --- INÍCIO: SELETOR DE MÊS ---
+  function initMonthSelector() {
+    const select = document.getElementById('monthSelector');
+    const monthsSet = new Set();
+    
+    // Coleta todos os meses que têm histórico na planilha
+    if (RAW.house) RAW.house.forEach(h => Object.keys(h.months || {}).forEach(m => monthsSet.add(m)));
+    if (RAW.imob) RAW.imob.forEach(i => Object.keys(i.months || {}).forEach(m => monthsSet.add(m)));
+    
+    let monthsArray = Array.from(monthsSet).sort();
+    
+    // Garante que o mês atual (hoje) esteja na lista, mesmo que ainda não tenha vendas
+    const actualCurrentMonth = monthKeyFromDate(new Date());
+    if (!monthsArray.includes(actualCurrentMonth)) {
+      monthsArray.push(actualCurrentMonth);
+      monthsArray.sort();
+    }
 
+    // Cria as opções da caixinha
+    select.innerHTML = monthsArray.map(mk => {
+      return `<option value="${mk}" style="color:#12201A; font-weight:500;">${monthLabel(mk)}</option>`;
+    }).join('');
+    
+    // Abre sempre considerando o mês atual da variável
+    select.value = CURRENT_MONTH;
+    
+    // Quando o usuário escolhe um mês novo, refaz os cálculos e muda a tela
+    select.onchange = (e) => {
+      CURRENT_MONTH = e.target.value;
+      PREV_3_MONTHS = [addMonths(CURRENT_MONTH,-3), addMonths(CURRENT_MONTH,-2), addMonths(CURRENT_MONTH,-1)];
+      expandedRow = null; // Encolhe qualquer linha aberta
+      renderAll();
+    };
+  }
+  
+  initMonthSelector();
+  // --- FIM: SELETOR DE MÊS ---
   renderAll();
 }
 </script>
