@@ -418,9 +418,98 @@
     .detail-lower{ grid-template-columns:1fr 1fr; }
     .detail-split{ grid-template-columns:1fr; }
   }
+
+  /* === TRAVA DE ENTRADA MRV (independente dos estilos do painel) === */
+  body:not(.mrv-access-unlocked) #appRoot { display: none !important; }
+  .mrv-access-gate {
+    position: fixed; inset: 0; z-index: 2147483647;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100dvh; padding: 24px;
+    background: linear-gradient(145deg, #12201A 0%, #00552F 75%, #006B3F 100%);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .mrv-access-card {
+    width: 100%; max-width: 440px; background: #FFFFFF;
+    padding: 34px; border-radius: 14px;
+    box-shadow: 0 20px 65px rgba(0, 0, 0, .24);
+  }
+  .mrv-access-brand {
+    color: #00552F; font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 16px;
+  }
+  .mrv-access-card h2 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: #12201A; font-size: 26px; margin: 0 0 8px;
+  }
+  .mrv-access-card p { color: #6B7A72; font-size: 13px; line-height: 1.6; margin: 0 0 24px; }
+  .mrv-access-card label {
+    display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #1E2E26;
+  }
+  .mrv-access-card input {
+    display: block; width: 100%; border: 1px solid #DCE5E0;
+    padding: 13px 14px; border-radius: 8px; font-size: 14px;
+    color: #12201A; background: #FAFBFA; font-family: 'Inter', system-ui, sans-serif;
+  }
+  .mrv-access-card input:focus { outline: 2px solid #006B3F; outline-offset: 1px; }
+  .mrv-access-card button {
+    display: block; width: 100%; margin-top: 16px; padding: 13px 16px;
+    border: 0; border-radius: 8px; background: #00552F; color: white;
+    cursor: pointer; font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px; font-weight: 700;
+  }
+  .mrv-access-card button:hover { background: #006B3F; }
+  .mrv-access-card button:disabled { cursor: default; opacity: .65; }
+  .mrv-access-feedback { min-height: 20px; margin-top: 14px; font-size: 12px; font-weight: 600; color: #B42318; }
+  .mrv-access-card .mrv-access-footnote { font-size: 11px; margin: 10px 0 0; }
+  @media (max-width: 500px) { .mrv-access-card { padding: 26px 22px; } }
 </style>
 </head>
 <body>
+
+<!-- TRAVA DE ENTRADA MRV: fora do painel, sem modificar sua estrutura interna. -->
+<div id="mrvAccessGate" class="mrv-access-gate">
+  <div class="mrv-access-card">
+    <div class="mrv-access-brand">MRV · Diretoria Comercial</div>
+    <h2>Acesso ao painel</h2>
+    <p>Informe seu e-mail corporativo para continuar ao Painel de Performance Comercial.</p>
+    <form id="mrvAccessForm" novalidate>
+      <label for="mrvAccessEmail">E-mail corporativo</label>
+      <input id="mrvAccessEmail" type="email" name="email" placeholder="nome@mrv.com.br" autocomplete="email" autocapitalize="off" spellcheck="false" autofocus required>
+      <button type="submit" id="mrvAccessButton">Acessar painel</button>
+      <div class="mrv-access-feedback" id="mrvAccessFeedback" role="alert" aria-live="assertive"></div>
+    </form>
+    <p class="mrv-access-footnote">Acesso permitido somente com e-mail @mrv.com.br.</p>
+  </div>
+</div>
+<script>
+/* Somente e-mails com domínio exatamente @mrv.com.br liberam a visualização. */
+(function setupMrvAccessGate(){
+  const form = document.getElementById('mrvAccessForm');
+  const input = document.getElementById('mrvAccessEmail');
+  const feedback = document.getElementById('mrvAccessFeedback');
+  const button = document.getElementById('mrvAccessButton');
+  form.addEventListener('submit', function(event){
+    event.preventDefault();
+    const email = input.value.trim();
+    const authorized = /^[^\s@]+@mrv\.com\.br$/i.test(email) && input.validity.typeMismatch === false;
+    if(authorized){
+      document.body.classList.add('mrv-access-unlocked');
+      document.getElementById('mrvAccessGate').remove();
+      document.dispatchEvent(new Event('mrv-access-approved'));
+      return;
+    }
+    feedback.textContent = 'Acesso negado: e-mail não autorizado. Encerrando a página...';
+    input.disabled = true;
+    button.disabled = true;
+    window.setTimeout(function(){
+      window.close();
+      /* Abas abertas manualmente normalmente não podem ser fechadas por JavaScript.
+         Nesses navegadores, sai do painel e mostra uma página em branco. */
+      window.setTimeout(function(){ window.location.replace('about:blank'); }, 200);
+    }, 1100);
+  });
+})();
+</script>
 
 <div id="appRoot">
 
@@ -580,7 +669,14 @@
 =============================================================*/
 const DATA_URL = 'https://raw.githubusercontent.com/SPIPerformance/Desafiodos30/main/Dados.xlsx';
 
-const RAW_READY = (async function loadRemoteData(){
+// A planilha remota só é solicitada após a liberação da tela de entrada.
+const RAW_READY = new Promise(resolve => {
+  document.addEventListener('mrv-access-approved', () => {
+    loadRemoteData().then(resolve);
+  }, { once: true });
+});
+
+async function loadRemoteData(){
   const fallback = JSON.parse(document.getElementById('default-data').textContent);
   if(!DATA_URL || DATA_URL.indexOf('COLE_AQUI') !== -1){
     return { data: fallback, source: 'fallback', reason: 'DATA_URL não configurada' };
@@ -597,7 +693,7 @@ const RAW_READY = (async function loadRemoteData(){
   }catch(err){
     return { data: fallback, source: 'fallback', reason: (err && err.message) ? err.message : String(err) };
   }
-})();
+}
 
 /* ============================================================
    APP INITIALIZATION
