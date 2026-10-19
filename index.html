@@ -247,6 +247,161 @@
 
   .legend{ display:flex; gap:16px; align-items:center; margin:14px 2px 0 2px; font-size:11px; color:var(--muted); flex-wrap:wrap;}
   .legend-swatch{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-2px;}
+
+  /* ============================================================
+     FUNIL GERENCIAL
+  =============================================================*/
+  .fg-grid{ display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:16px; align-items:start; margin-bottom:18px; }
+  .fg-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+  .fg-header{
+    background:var(--brand); color:#fff; padding:12px 16px; border-radius:var(--radius) var(--radius) 0 0;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .fg-header .fg-title{ font-family:'Space Grotesk'; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.04em; }
+  .fg-header select{
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff;
+    border-radius:7px; padding:7px 10px; font-family:'Inter'; font-weight:600; font-size:13px; max-width:280px;
+  }
+  .fg-header select option{ color:#12201A; }
+  .fg-body{ padding:14px 16px; }
+  .fg-updated{ font-size:10.5px; color:var(--muted); font-style:italic; margin-top:8px; }
+
+  .fg-row{ display:grid; grid-template-columns:150px 1fr 1fr 70px; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid #F0F2F0; }
+  .fg-row:last-child{ border-bottom:none; }
+  .fg-row .fg-label{ font-size:11.5px; font-weight:700; color:var(--ink-2); }
+  .fg-bar-wrap{ position:relative; height:22px; background:#F1F3F1; border-radius:5px; overflow:hidden; }
+  .fg-bar{ position:absolute; top:0; left:0; height:100%; display:flex; align-items:center; justify-content:flex-end; padding-right:6px; font-family:'IBM Plex Mono'; font-weight:700; font-size:11px; color:#fff; border-radius:5px; white-space:nowrap; transition:width .2s; }
+  .fg-bar.meta{ background:var(--accent); color:#291200; }
+  .fg-bar.real{ background:var(--green); }
+  .fg-gap{ text-align:right; font-family:'IBM Plex Mono'; font-weight:700; font-size:12px; }
+  .fg-header-row{ display:grid; grid-template-columns:150px 1fr 1fr 70px; gap:8px; font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; padding-bottom:6px; border-bottom:2px solid var(--line); margin-bottom:4px; }
+  .fg-header-row span:last-child, .fg-header-row span:nth-child(3){ text-align:right; padding-right:6px; }
+
+  .fg-venda-input{
+    display:flex; align-items:center; gap:8px; background:#FFF8EE; border:1px dashed var(--accent);
+    border-radius:8px; padding:8px 12px; margin-top:10px; font-size:12px; color:#8A4A0F; font-weight:600;
+  }
+  .fg-venda-input input{
+    width:80px; border:1px solid var(--accent); border-radius:6px; padding:5px 8px; font-family:'IBM Plex Mono';
+    font-weight:700; font-size:13px; text-align:center;
+  }
+
+  .fg-convinfo{ margin-top:10px; font-size:11px; color:var(--muted); }
+  .fg-convinfo-title{ font-weight:700; text-transform:uppercase; letter-spacing:.04em; font-size:9.5px; margin-bottom:5px; }
+  .fg-conv-chip{ display:inline-block; background:var(--green-soft); color:#0F6B3D; border-radius:999px; padding:3px 9px; margin:0 5px 5px 0; font-weight:700; font-size:10.5px; }
+  .fg-conv-chip-fallback{ background:#FFF3E0; color:#8A4A0F; }
+  .fg-conv-chip-desafio{ background:#FFE7CF; color:#8A4A0F; border:1px solid var(--accent); }
+  .fg-conv-chip small{ font-weight:600; opacity:.8; }
+  .fg-convinfo-note{ font-size:10px; font-style:italic; margin-top:2px; }
+
+  .fg-indicators{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .fg-ind-card{ background:#F7FAF8; border:1px solid var(--line); border-radius:9px; padding:12px 14px; text-align:center; }
+  .fg-ind-card .fg-ind-label{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; margin-bottom:6px; }
+  .fg-ind-card .fg-ind-value{ font-family:'Space Grotesk'; font-size:22px; font-weight:700; color:var(--brand-2); }
+  .fg-ind-card .fg-ind-meta{ font-size:10.5px; color:var(--muted); margin-top:2px; }
+  .fg-ind-card.wide{ grid-column:1 / -1; }
+
+  .fg-week-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  .fg-week-table th{
+    background:var(--brand); color:#fff; padding:8px 6px; font-size:9.5px; text-transform:uppercase;
+    letter-spacing:.03em; font-weight:700; text-align:center; white-space:nowrap;
+  }
+  .fg-week-table th.fg-week-group{ background:var(--brand-2); }
+  .fg-week-table td{ padding:7px 6px; text-align:center; border-bottom:1px solid #EEF1EE; font-family:'IBM Plex Mono'; }
+  .fg-week-table td.fg-stage-label{ text-align:left; font-family:'Inter'; font-weight:700; color:var(--ink-2); white-space:nowrap; }
+  .fg-week-table .fg-real{ color:var(--ink); font-weight:700; }
+  .fg-week-table .fg-meta{ color:var(--muted); }
+  .fg-week-table td.fg-total-real{ background:#F3F8F5; font-weight:700; }
+  .fg-week-table td.fg-total-meta{ background:#FFF3E0; font-weight:700; }
+  .fg-week-table td.fg-ating-pos{ background:var(--green-soft); color:#0F6B3D; font-weight:700; }
+  .fg-week-table td.fg-ating-neg{ background:var(--red-soft); color:#B42318; font-weight:700; }
+  .fg-conv-badges{ display:flex; gap:14px; margin-top:10px; flex-wrap:wrap; }
+  .fg-conv-badge{ flex:1; min-width:200px; display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:8px; font-weight:700; }
+  .fg-conv-badge .fg-conv-label{ font-size:11.5px; }
+  .fg-conv-badge .fg-conv-value{ font-family:'IBM Plex Mono'; font-size:16px; padding:3px 10px; border-radius:6px; }
+
+  .fg-corretor-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  .fg-corretor-table th{
+    background:#F1F3F1; color:var(--ink-2); padding:8px 8px; font-size:10px; text-transform:uppercase;
+    font-weight:700; text-align:center; border-bottom:2px solid var(--line);
+  }
+  .fg-corretor-table th.fg-c-left{ text-align:left; }
+  .fg-corretor-table td{ padding:7px 8px; text-align:center; border-bottom:1px solid #EEF1EE; font-family:'IBM Plex Mono'; }
+  .fg-corretor-table td.fg-c-left{ text-align:left; font-family:'Inter'; font-weight:600; color:var(--ink-2); white-space:nowrap; }
+  .fg-corretor-table tr.fg-total-row td{ background:#F3F8F5; font-weight:700; }
+  .fg-corretor-table .fg-conv-cell{ font-size:10.5px; color:var(--muted); }
+
+  /* barras: rótulo fora da barra quando ela é estreita */
+  .fg-bar.narrow{ overflow:visible; }
+  .fg-bar.narrow .fg-bar-val{ position:absolute; left:100%; margin-left:5px; color:var(--ink); }
+
+  /* abas + ordenação + diagnóstico */
+  .fg-tabs{ display:flex; gap:4px; background:rgba(255,255,255,0.12); border-radius:999px; padding:3px; }
+  .fg-tab{ border:none; background:transparent; color:#CFE0D6; font-family:'Inter'; font-weight:600; font-size:11.5px; padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .fg-tab.active{ background:var(--accent); color:#291200; }
+  .fg-corretor-table th.fg-sortable{ cursor:pointer; user-select:none; white-space:nowrap; }
+  .fg-corretor-table th.fg-sortable:hover{ background:#E6ECE8; }
+  .fg-corretor-table th .fg-arrow{ font-size:9px; margin-left:3px; color:var(--brand-2); }
+  .fg-diag-filter{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--ink-2); margin-bottom:10px; cursor:pointer; }
+  .fg-corretor-table td.fg-d-bad{ background:var(--red-soft); }
+  .fg-corretor-table td.fg-d-ok{ background:var(--green-soft); }
+  .fg-corretor-table td.fg-d-na{ color:var(--muted); }
+  .fg-corretor-table td.fg-d-bad .fg-d-rate{ color:#B42318; font-weight:700; }
+  .fg-corretor-table td.fg-d-ok .fg-d-rate{ color:#0F6B3D; font-weight:700; }
+  .fg-corretor-table tr.fg-meta-row td{ background:#FFF3E0; font-weight:700; }
+  .fg-corretor-table td.fg-d-help{ text-align:left; font-family:'Inter'; min-width:240px; }
+  .fg-diag-chip{ display:inline-block; background:#FDECEC; color:#B42318; border:1px solid #F5C2C4; border-radius:999px; padding:3px 9px; margin:2px 4px 2px 0; font-size:10.5px; font-weight:700; white-space:nowrap; }
+  .fg-diag-chip.ok{ background:var(--green-soft); color:#0F6B3D; border-color:#BFE0CB; }
+  .fg-diag-note{ font-size:10.5px; color:var(--muted); font-style:italic; margin-top:10px; line-height:1.5; }
+
+  .fg-dist-item{ display:inline-block; background:#F1F3F1; border-radius:6px; padding:3px 8px; margin:0 6px 6px 0; font-size:10.5px; color:var(--ink-2); }
+  .fg-cmp-btn{
+    margin-top:12px; width:100%; border:1px solid var(--brand-2); background:#fff; color:var(--brand-2);
+    border-radius:8px; padding:9px 12px; font-family:'Inter'; font-weight:700; font-size:12.5px; cursor:pointer;
+  }
+  .fg-cmp-btn:hover{ background:var(--green-soft); }
+  .fg-cmp-btn.on{ background:var(--brand-2); color:#fff; }
+  .fg-cmp-resumo{ font-size:13px; color:var(--ink-2); margin-bottom:12px; line-height:1.5; }
+  .fg-cmp-resumo b{ color:var(--brand-2); }
+  .fg-week-table td.fg-cmp-best, .fg-week-table th.fg-cmp-best{ outline:2px solid var(--accent); outline-offset:-2px; }
+  .fg-week-table th.fg-cmp-best{ background:var(--accent); color:#291200; }
+  .fg-cmp-delta{ display:block; font-family:'Inter'; font-size:10px; font-weight:700; }
+  .fg-cmp-up{ color:#0F6B3D; } .fg-cmp-down{ color:#B42318; }
+  .fg-week-table tr.fg-cmp-foot td{ background:#F3F8F5; font-weight:700; font-family:'Inter'; font-size:11px; }
+
+  /* Canal IMOB — imobiliárias do supervisor */
+  .im-wrap{ margin-top:24px; }
+  .im-sub{ font-size:11px; color:var(--muted); margin:-2px 0 12px 0; line-height:1.5; }
+  .im-alert{ background:#FFF8EE; border:1px solid #F5C99A; border-radius:10px; padding:12px 14px; margin-bottom:14px; }
+  .im-alert-title{ font-weight:700; font-size:12.5px; color:#8A4A0F; margin-bottom:8px; }
+  .im-alert-item{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:6px 0; border-top:1px dashed #F0D3B3; font-size:12px; }
+  .im-alert-item:first-of-type{ border-top:none; }
+  .im-alert-item b{ color:var(--ink-2); }
+  .im-alert-ref{ font-size:10.5px; color:var(--muted); font-family:'IBM Plex Mono'; }
+  .im-ok{ background:var(--green-soft); border:1px solid #BFE0CB; color:#0F6B3D; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; font-weight:600; }
+  .im-chip{ display:inline-block; border-radius:999px; padding:2px 9px; margin:1px 4px 1px 0; font-size:10px; font-weight:700; white-space:nowrap; background:#FDECEC; color:#B42318; border:1px solid #F5C2C4; }
+  .im-chip.warn{ background:#FFF3E0; color:#8A4A0F; border-color:#F5C99A; }
+  .im-chip.ok{ background:var(--green-soft); color:#0F6B3D; border-color:#BFE0CB; }
+  .im-chip.new{ background:#E8F1FB; color:#1F5FA8; border-color:#BCD6F2; }
+  .im-scroll{ max-height:420px; overflow:auto; }
+  .im-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  .im-table th{ position:sticky; top:0; background:#fff; z-index:1; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700; padding:7px 8px; text-align:center; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .im-table td{ padding:7px 8px; text-align:center; border-bottom:1px solid #EEF1EE; }
+  .im-table td.im-name{ text-align:left; font-weight:600; color:var(--ink-2); max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .im-table th.im-name{ text-align:left; }
+  .im-table tr.im-total td{ background:#F3F8F5; font-weight:700; }
+  .im-table td.im-status{ text-align:left; min-width:150px; }
+
+  /* comparativo de conversão dos corretores (mesmo período) */
+  .cp-scroll{ max-height:340px; overflow:auto; }
+  .cp-sub{ font-size:11px; color:var(--muted); margin:-4px 0 10px 0; line-height:1.45; }
+  .cp-now{ font-family:'IBM Plex Mono'; font-weight:700; font-size:12px; white-space:nowrap; }
+  .cp-prev{ font-size:10px; color:var(--muted); white-space:nowrap; }
+  .cp-up{ color:#0F6B3D; } .cp-down{ color:#B42318; } .cp-flat{ color:var(--muted); }
+  .cp-low{ color:var(--muted); font-weight:600; }
+  .cp-table th{ position:sticky; top:0; background:#fff; z-index:1; }
+  .cp-table tr.cp-total td{ background:#F3F8F5; font-weight:700; }
+
   footer{ text-align:center; font-size:11px; color:var(--muted); padding:20px; }
 
   .toast{
@@ -281,6 +436,7 @@
         <div class="canal-toggle" style="margin-right: 6px;">
           <button id="btnHouse" class="">Canal House</button>
           <button id="btnImob" class="active">Canal Imob</button>
+          <button id="btnFunilGerencial" class="">Funil Gerencial</button>
         </div>
         
         <!-- SELETOR DE MÊS -->
@@ -341,7 +497,67 @@
     </div>
   </div>
 
-  <div class="legend">
+  <div id="funilGerencialView" style="display:none;">
+    <div class="fg-grid">
+      <div class="fg-card">
+        <div class="fg-header">
+          <span class="fg-title">Funil (selecionar nome ao lado)</span>
+          <select id="fgGerenteSelect"></select>
+        </div>
+        <div class="fg-body">
+          <div class="fg-header-row"><span>Etapas</span><span>Meta</span><span>Real</span><span>Gap</span></div>
+          <div id="fgFunilRows"></div>
+          <div class="fg-venda-input">
+            🎯 Meta de Vendas (base: 10 por gerente — editável):
+            <input type="number" id="fgMetaVenda" min="0" value="10">
+          </div>
+          <div class="fg-convinfo" id="fgConvInfo"></div>
+          <button class="fg-cmp-btn" id="fgCompareBtn">📊 Comparar com performance anterior</button>
+          <div class="fg-updated" id="fgUpdated">Atualizado em: —</div>
+        </div>
+      </div>
+      <div class="fg-card">
+        <div class="fg-header"><span class="fg-title">Indicadores no mês</span></div>
+        <div class="fg-body">
+          <div class="fg-indicators" id="fgIndicadores"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fg-card" id="fgComparePanel" style="display:none; margin-bottom:18px;">
+      <div class="fg-header"><span class="fg-title" id="fgCompareTitle">Comparação com performance anterior</span></div>
+      <div class="fg-body" style="overflow-x:auto;" id="fgCompareBody"></div>
+    </div>
+
+    <div class="fg-card" style="margin-bottom:18px;">
+      <div class="fg-header"><span class="fg-title">Funil por semana</span></div>
+      <div class="fg-body" style="overflow-x:auto;">
+        <table class="fg-week-table" id="fgWeekTable"></table>
+        <div class="fg-conv-badges" id="fgConvBadges"></div>
+        <div class="fg-convinfo" id="fgDistInfo" style="margin-top:14px;"></div>
+      </div>
+    </div>
+
+    <div class="fg-card">
+      <div class="fg-header">
+        <span class="fg-title">Corretores da equipe</span>
+        <div class="fg-tabs">
+          <button class="fg-tab active" id="fgTabFunil">Funil</button>
+          <button class="fg-tab" id="fgTabDiag">Diagnóstico</button>
+        </div>
+      </div>
+      <div class="fg-body" style="overflow-x:auto;">
+        <table class="fg-corretor-table" id="fgCorretorTable"></table>
+        <div id="fgDiagWrap" style="display:none;">
+          <label class="fg-diag-filter"><input type="checkbox" id="fgDiagSoAlerta"> Mostrar apenas corretores com alerta</label>
+          <table class="fg-corretor-table" id="fgDiagTable"></table>
+          <div class="fg-diag-note" id="fgDiagNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" id="mainLegend">
     <span><span class="legend-swatch" style="background:#E5484D"></span>Abaixo do esperado</span>
     <span><span class="legend-swatch" style="background:#FFC93C"></span>Intermediário</span>
     <span><span class="legend-swatch" style="background:#006B3F"></span>Bom desempenho</span>
@@ -410,6 +626,199 @@ let meta = Math.max(0, today.getDate() - 1);
 let STAGES = null;
 let LABELS = null;
 
+/* ============================================================
+   FUNIL GERENCIAL — estado e cálculo reverso de metas
+=============================================================*/
+let selectedGerenteFG = null;              // nome do gerente selecionado
+let metaVendaPorGerente = {};              // nome -> meta de vendas (editável); padrão = FG_META_VENDA_BASE
+const FG_META_VENDA_BASE = 10;             // meta-base de vendas de cada gerente
+
+// Transições do funil (cada etapa -> próxima). A conversão de cada uma é a
+// média HISTÓRICA do próprio gerente (soma da etapa seguinte ÷ soma da etapa
+// anterior, nos meses do ano anteriores ao mês selecionado). Quando o gerente
+// não tem histórico suficiente naquela transição, usa o percentual padrão
+// ("fallback") abaixo.
+const FUNIL_TRANSICOES = [
+  { from:'LEAD',          to:'DOC_ENVIADA',   fallback:0.12 },
+  { from:'DOC_ENVIADA',   to:'DOC_ANALISE',   fallback:1.00 },
+  { from:'DOC_ANALISE',   to:'CPF_ANALISADO', fallback:1.00 },
+  { from:'CPF_ANALISADO', to:'CPF_APROVADO',  fallback:0.75 },
+  { from:'CPF_APROVADO',  to:'GANHO',         fallback:0.40 },
+];
+
+// Soma uma etapa nos meses do mesmo ano anteriores a monthKey.
+// 'GANHO' (Venda) usa a base de vendas (mesma fonte da tabela principal).
+function sumEtapaHistorico(entry, stage, monthKey){
+  const year = monthKey.slice(0,4);
+  let total = 0;
+  if(stage === 'GANHO'){
+    Object.keys(entry.vendas_por_mes || {}).forEach(mk=>{
+      if(mk.slice(0,4) === year && mk < monthKey) total += entry.vendas_por_mes[mk] || 0;
+    });
+  } else {
+    Object.keys(entry.months || {}).forEach(mk=>{
+      if(mk.slice(0,4) === year && mk < monthKey) total += (entry.months[mk][stage] || 0);
+    });
+  }
+  return total;
+}
+
+// DESAFIO — só para a conversão inicial (Lead→Doc). A meta nunca usa uma
+// conversão abaixo destas faixas:
+//   < 8%      -> 8%
+//   8% a <10% -> 10%
+//   10% a <12%-> 12%
+//   12% a <15%-> 15%
+//   15% a <20%-> 20%
+//   >= 20%    -> mantém a conversão histórica
+// (limite inferior inclusivo: exatamente 8% já sobe para 10%)
+function aplicarDesafioLeadDoc(rate){
+  const p = Math.round(rate * 100 * 1e6) / 1e6;
+  if(p < 8)  return 0.08;
+  if(p < 10) return 0.10;
+  if(p < 12) return 0.12;
+  if(p < 15) return 0.15;
+  if(p < 20) return 0.20;
+  return rate;
+}
+
+// ------------------------------------------------------------
+// CONVERSÃO USADA NA META — racional (inspirado na planilha de Excel):
+//   K = conversão histórica do GERENTE
+//   J = conversão histórica da REGIONAL do gerente (proxy de "cidade": a base
+//       não traz cidade, só regional)
+//   N = conversão histórica da DIRETORIA (todos os gerentes House)
+// Em todas as etapas: sem histórico do gerente (K vazio/0) usa a regional (J);
+// sem J, usa a diretoria (N); sem nada, o percentual padrão.
+// Com histórico do gerente, cada etapa tem uma regra:
+//   Lead→Doc (inicial) ........ desafio por faixas (aplicarDesafioLeadDoc)
+//   Doc Enviada→Doc Pend./Anl. . o MENOR entre K e N
+//   Doc Pend.→CPF Analisado ... o MAIOR entre K e N
+//   CPF Analisado→Aprovado .... o MENOR entre K e N
+//   CPF Aprovado→Venda ........ o MENOR entre K e N (mesma regra da etapa
+//                               anterior — a fórmula enviada repetia a da etapa 4)
+// ------------------------------------------------------------
+const REGRA_CONVERSAO_ETAPA = {
+  DOC_ENVIADA:   'desafio',
+  DOC_ANALISE:   'min',
+  CPF_ANALISADO: 'max',
+  CPF_APROVADO:  'min',
+  GANHO:         'min',
+};
+// Conversão histórica de um grupo de gerentes (soma de todos ÷ soma de todos),
+// nos meses do ano anteriores a monthKey. null = sem base.
+function convHistGrupo(entries, from, to, monthKey){
+  let den = 0, num = 0;
+  entries.forEach(e=>{ den += sumEtapaHistorico(e, from, monthKey); num += sumEtapaHistorico(e, to, monthKey); });
+  return (den > 0 && num > 0) ? num / den : null;
+}
+function getDiretoriaFG(){ return RAW.house.filter(e => !isHiddenByCode('house', e.nome)); }
+
+// Conversão de referência K→J→N sem regra de min/max (usada nos elos do
+// diagnóstico que não têm regra própria).
+function convHierarquia(entry, from, to, monthKey){
+  const dir = getDiretoriaFG();
+  const K = convHistGrupo([entry], from, to, monthKey);
+  if(K !== null) return K;
+  const J = convHistGrupo(dir.filter(e=>e.regional === entry.regional), from, to, monthKey);
+  if(J !== null) return J;
+  return convHistGrupo(dir, from, to, monthKey);
+}
+
+// Conversões usadas na meta deste gerente:
+// [{from,to,rate,fonte,usouHistorico,desafio,K,J,N,regra,rateHistorico}]
+//  fonte: 'gerente' | 'regional' | 'diretoria' | 'padrao'
+function computeConversoesGerente(entry, monthKey){
+  const dir = getDiretoriaFG();
+  const regional = dir.filter(e => e.regional === entry.regional);
+  return FUNIL_TRANSICOES.map(t=>{
+    const K = convHistGrupo([entry], t.from, t.to, monthKey);
+    const J = convHistGrupo(regional, t.from, t.to, monthKey);
+    const N = convHistGrupo(dir, t.from, t.to, monthKey);
+    const regra = REGRA_CONVERSAO_ETAPA[t.to];
+    let rate, fonte, desafio = false;
+    if(K !== null){
+      if(regra === 'desafio'){
+        rate = aplicarDesafioLeadDoc(K); desafio = rate > K; fonte = 'gerente';
+      } else if(N === null){
+        rate = K; fonte = 'gerente';
+      } else if(regra === 'min'){
+        rate = Math.min(K, N); fonte = (rate === K) ? 'gerente' : 'diretoria';
+      } else {
+        rate = Math.max(K, N); fonte = (rate === K) ? 'gerente' : 'diretoria';
+      }
+    } else if(J !== null){ rate = J; fonte = 'regional'; }
+    else if(N !== null){ rate = N; fonte = 'diretoria'; }
+    else { rate = t.fallback; fonte = 'padrao'; }
+    return { from:t.from, to:t.to, rate, fonte, usouHistorico: fonte !== 'padrao', desafio, K, J, N, regra, rateHistorico: K };
+  });
+}
+
+// Funil reverso: a partir da meta de vendas, calcula a meta de cada etapa
+// anterior dividindo pela conversão (histórica) de cada transição.
+function computeMetasReversas(metaVenda, conversoes){
+  const rateOf = (to)=> conversoes.find(c=>c.to===to).rate;
+  const GANHO = metaVenda || 0;
+  const CPF_APROVADO  = GANHO / rateOf('GANHO');
+  const CPF_ANALISADO = CPF_APROVADO / rateOf('CPF_APROVADO');
+  const DOC_ANALISE   = CPF_ANALISADO / rateOf('CPF_ANALISADO');
+  const DOC_ENVIADA   = DOC_ANALISE / rateOf('DOC_ANALISE');
+  const LEAD          = DOC_ENVIADA / rateOf('DOC_ENVIADA');
+  return { LEAD, DOC_ENVIADA, DOC_ANALISE, CPF_ANALISADO, CPF_APROVADO, GANHO };
+}
+
+// Só gerentes com alguma ação no mês selecionado (qualquer etapa do funil ou
+// venda) — evita poluir a lista com gerentes que já saíram.
+function getGerentesAtivosFG(){
+  return RAW.house
+    .filter(e => !isHiddenByCode('house', e.nome))
+    .filter(e => {
+      const m = (e.months && e.months[CURRENT_MONTH]) || null;
+      const temFunil = m && STAGE_KEYS.some(s => (m[s] || 0) > 0);
+      const temVenda = ((e.vendas_por_mes && e.vendas_por_mes[CURRENT_MONTH]) || 0) > 0;
+      return temFunil || temVenda;
+    })
+    .map(e => e.nome)
+    .sort((a,b)=>a.localeCompare(b));
+}
+
+const FG_STAGE_ROWS = [
+  { key:'LEAD', label:'Lead' },
+  { key:'DOC_ENVIADA', label:'Documentação Enviada' },
+  { key:'DOC_ANALISE', label:'Doc. c/ Pendência / Em Análise' },
+  { key:'CPF_ANALISADO', label:'CPF Analisado' },
+  { key:'CPF_APROVADO', label:'CPF Aprovado / Condicionado' },
+  { key:'GANHO', label:'Venda' },
+];
+const FG_WEEK_START_DAY = {1:1, 2:8, 3:15, 4:22, 5:29};
+
+// Como a meta MENSAL de cada etapa se distribui nas 5 semanas (% por semana,
+// soma 100). Segue a lógica do funil: topo (Lead e Doc. Enviada) pesa mais nas
+// semanas 1-2 (60%); CPF Aprovado pesa mais nas semanas 3-4 (60%); Venda tem
+// 40% até a semana 3 e 60% no final (semanas 4-5).
+// As etapas intermediárias (Doc. c/ Pend./Análise e CPF Analisado) não tinham
+// regra definida: seguem o fluxo entre o topo e o CPF Aprovado.
+const FG_DISTRIBUICAO_SEMANAL = {
+  LEAD:          [30, 30, 15, 15, 10],
+  DOC_ENVIADA:   [30, 30, 15, 15, 10],
+  DOC_ANALISE:   [20, 30, 25, 15, 10],
+  CPF_ANALISADO: [10, 20, 30, 25, 15],
+  CPF_APROVADO:  [10, 15, 30, 30, 15],
+  GANHO:         [10, 10, 20, 30, 30],
+};
+// Meta de cada semana, com arredondamento acumulado (a soma das semanas
+// sempre fecha exatamente no total do mês).
+function fgMetaPorSemana(totalMes, pesos){
+  let cumPeso = 0, anterior = 0;
+  return pesos.map(pw=>{
+    cumPeso += pw;
+    const acumulado = Math.round((totalMes || 0) * cumPeso / 100);
+    const semana = acumulado - anterior;
+    anterior = acumulado;
+    return semana;
+  });
+}
+
 const MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
 function monthKeyFromDate(d){
@@ -444,6 +853,7 @@ function flattenEntry(entry, monthKey, isHouse){
     row.vendas = (entry.vendas_por_mes && entry.vendas_por_mes[monthKey]) || 0;
     row.equipe_produtiva = (entry.produtivos_por_mes && entry.produtivos_por_mes[monthKey]) || 0;
     row.corretores = (entry.corretores_por_mes && entry.corretores_por_mes[monthKey]) || [];
+    row.corretor_funil = (entry.corretor_funil_por_mes && entry.corretor_funil_por_mes[monthKey]) || {};
   } else {
     row.vendas = (entry.vendas_por_mes && entry.vendas_por_mes[monthKey]) || 0;
   }
@@ -701,6 +1111,232 @@ function renderVerticalFunnel(r){
   return html;
 }
 
+/* ============================================================
+   CANAL HOUSE — conversão dos corretores no MESMO PERÍODO
+   Compara a conversão de cada corretor nos dias 1 a D do mês selecionado
+   com a conversão agregada dos 3 meses anteriores nos mesmos dias 1 a D.
+   D = dia de hoje (mês corrente) ou o mês inteiro (mês fechado).
+   As vendas deste recorte vêm do funil (Ganho), pois a base de vendas
+   assinadas é mensal e não permite cortar por dia.
+=============================================================*/
+const CP_STEPS = [
+  { label:'Lead → Doc',           from:'LEAD',            to:'DOC_ENVIADA',     min:10 },
+  { label:'Doc Pend. → CPF Anl.', from:'DOC_ANALISE',     to:'CPF_ANALISADO',   min:3 },
+  { label:'CPF Anl. → Aprov.',    from:'CPF_ANALISADO',   to:'CPF_APROVADO',    min:3 },
+  { label:'Aprov. → Gerado',      from:'CPF_APROVADO',    to:'CONTRATO_GERADO', min:3 },
+  { label:'Gerado → Venda',       from:'CONTRATO_GERADO', to:'GANHO',           min:3 },
+];
+function cpCutoffDay(){
+  return CURRENT_MONTH === monthKeyFromDate(new Date()) ? new Date().getDate() : 31;
+}
+// soma as etapas de um corretor nos dias 1..maxDay dos meses informados
+function cpSomaPeriodo(entry, months, corretor, maxDay){
+  const out = {};
+  Object.keys(DIA_STAGES).forEach(k=> out[k]=0);
+  months.forEach(mk=>{
+    const dias = entry.corretor_dia_por_mes && entry.corretor_dia_por_mes[mk] && entry.corretor_dia_por_mes[mk][corretor];
+    if(!dias) return;
+    Object.keys(dias).forEach(d=>{
+      if(+d > maxDay) return;
+      Object.keys(dias[d]).forEach(st=>{ out[st] += dias[d][st]; });
+    });
+  });
+  return out;
+}
+function cpCell(now, past, step){
+  const den = now[step.from], num = now[step.to];
+  const rateNow = den > 0 ? num / den : null;
+  if(rateNow === null) return `<td class="cp-low">—</td>`;
+  const denP = past[step.from], numP = past[step.to];
+  const ratePast = denP > 0 ? numP / denP : null;
+  const nowTxt = fmtPct(rateNow * 100);
+  if(den < step.min){
+    return `<td title="Amostra pequena (${den} casos) — sem comparação"><div class="cp-now cp-low">${nowTxt}</div><div class="cp-prev">amostra baixa</div></td>`;
+  }
+  if(ratePast === null){
+    return `<td><div class="cp-now">${nowTxt}</div><div class="cp-prev">sem base anterior</div></td>`;
+  }
+  const diffPp = (rateNow - ratePast) * 100;
+  let arrow = '=', cls = 'cp-flat';
+  if(diffPp >= 0.5){ arrow = '▲'; cls = 'cp-up'; }
+  else if(diffPp <= -0.5){ arrow = '▼'; cls = 'cp-down'; }
+  const sinal = diffPp > 0 ? '+' : '';
+  return `<td title="Agora: ${num}/${den} · Mesmo período anterior: ${numP}/${denP}">
+    <div class="cp-now ${cls}">${nowTxt} ${arrow}</div>
+    <div class="cp-prev">ant. ${fmtPct(ratePast * 100)} (${sinal}${diffPp.toFixed(1).replace('.',',')} p.p.)</div></td>`;
+}
+function renderCorretorComparativoPeriodo(r){
+  if(CANAL !== 'house') return '';
+  const entry = findEntry('house', r.nome);
+  if(!entry) return '';
+  const D = cpCutoffDay();
+  const atual = entry.corretor_dia_por_mes && entry.corretor_dia_por_mes[CURRENT_MONTH];
+  const periodo = (CURRENT_MONTH === monthKeyFromDate(new Date()))
+    ? `dias 1 a ${D} de ${monthLabel(CURRENT_MONTH)}`
+    : `${monthLabel(CURRENT_MONTH)} completo`;
+  const titulo = `<div class="funnel-title" style="margin-bottom:6px;">Conversão dos corretores — ${periodo} vs. mesmo período de ${PREV_3_MONTHS.map(monthLabel).join(', ')}</div>`;
+  if(!atual || Object.keys(atual).length === 0){
+    return `<div class="corretor-wrap">${titulo}<div style="font-size:12px; color:var(--muted);">Sem dados diários de corretores neste período.</div></div>`;
+  }
+
+  const rows = Object.keys(atual).map(nome=>({
+    nome,
+    now: cpSomaPeriodo(entry, [CURRENT_MONTH], nome, D),
+    past: cpSomaPeriodo(entry, PREV_3_MONTHS, nome, D),
+  })).filter(x => x.now.LEAD > 0 || x.now.DOC_ENVIADA > 0 || x.now.CPF_APROVADO > 0)
+     .sort((a,b)=> b.now.LEAD - a.now.LEAD);
+
+  const total = { now:{}, past:{} };
+  Object.keys(DIA_STAGES).forEach(k=>{ total.now[k]=0; total.past[k]=0; });
+  rows.forEach(x=> Object.keys(DIA_STAGES).forEach(k=>{ total.now[k]+=x.now[k]; total.past[k]+=x.past[k]; }));
+
+  const head = `<thead><tr><th style="text-align:left">Corretor</th>${CP_STEPS.map(st=>`<th>${st.label}</th>`).join('')}</tr></thead>`;
+  const totalRow = `<tr class="cp-total"><td style="text-align:left">Equipe</td>${CP_STEPS.map(st=>cpCell(total.now, total.past, {...st, min:1})).join('')}</tr>`;
+  const body = rows.map(x=>`<tr>
+      <td style="text-align:left; white-space:nowrap;" title="${x.nome}">${shortName(x.nome)}</td>
+      ${CP_STEPS.map(st=>cpCell(x.now, x.past, st)).join('')}
+    </tr>`).join('');
+
+  return `<div class="corretor-wrap">
+    ${titulo}
+    <div class="cp-sub">▲ conversão maior que no mesmo período anterior · ▼ menor · "ant." = conversão agregada dos 3 meses anteriores nos mesmos dias. Vendas do recorte vêm do funil (Ganho).</div>
+    <div class="cp-scroll"><table class="corretor-table cp-table">${head}<tbody>${totalRow}${body}</tbody></table></div>
+  </div>`;
+}
+
+/* ============================================================
+   CANAL IMOB — imobiliárias do supervisor
+   Hierarquia: Gerente IMOB → supervisor (esta linha) → imobiliárias.
+   Mostra o funil de cada imobiliária no período (dias 1 a D do mês
+   selecionado) contra a MÉDIA dos 3 meses anteriores nos mesmos dias, as
+   vendas (base de vendas assinadas, mensal) e um lembrete das imobiliárias
+   que tinham movimento antes e ainda não desenvolveram o funil neste mês.
+=============================================================*/
+const IM_STAGES = [
+  { key:'LEAD',          label:'Lead' },
+  { key:'DOC_ENVIADA',   label:'Doc. Enviada' },
+  { key:'DOC_ANALISE',   label:'Doc. Pend./Anl.' },
+  { key:'CPF_ANALISADO', label:'CPF Analisado' },
+  { key:'CPF_APROVADO',  label:'CPF Aprov./Cond.' },
+];
+const IM_SEM_IMOB = '(sem imobiliária)';
+// Média passada mínima (no mesmo período) para considerar que a imobiliária
+// "deveria" já ter movimento naquela etapa — evita alarme com média fracionada.
+const IM_MIN_MEDIA_ALERTA = 1;
+
+function imSomaPeriodo(entry, months, imob, maxDay){
+  const out = {};
+  Object.keys(DIA_STAGES).forEach(k=> out[k]=0);
+  months.forEach(mk=>{
+    const dias = entry.imobs_dia_por_mes && entry.imobs_dia_por_mes[mk] && entry.imobs_dia_por_mes[mk][imob];
+    if(!dias) return;
+    Object.keys(dias).forEach(d=>{
+      if(+d > maxDay) return;
+      Object.keys(dias[d]).forEach(st=>{ out[st] += dias[d][st]; });
+    });
+  });
+  return out;
+}
+function imCell(cur, pastAvg){
+  let sub = '';
+  if(pastAvg > 0){
+    const rel = (cur - pastAvg) / pastAvg * 100;
+    const med = `méd. ${pastAvg.toFixed(1).replace('.',',')}`;
+    sub = Math.abs(rel) < 0.5
+      ? `<div class="cp-prev">= ${med}</div>`
+      : `<div class="cp-prev"><span class="${rel>0?'cp-up':'cp-down'}">${rel>0?'▲ +':'▼ '}${rel.toFixed(0)}%</span> ${med}</div>`;
+  } else if(cur > 0){
+    sub = `<div class="cp-prev cp-up">▲ sem base anterior</div>`;
+  }
+  return `<td><div class="cp-now">${fmtInt(cur)}</div>${sub}</td>`;
+}
+
+function renderImobSection(r){
+  if(CANAL !== 'imob') return '';
+  const entry = findEntry('imob', r.nome);
+  if(!entry) return '';
+  const D = cpCutoffDay();
+  const ehCorrente = CURRENT_MONTH === monthKeyFromDate(new Date());
+  const periodo = ehCorrente ? `dias 1 a ${D}` : 'mês completo';
+  const funilMes = (mk)=> (entry.imobs_por_mes && entry.imobs_por_mes[mk]) || {};
+  const vendasMes = (mk)=> (entry.imobs_vendas_por_mes && entry.imobs_vendas_por_mes[mk]) || {};
+  const titulo = `<div class="funnel-title" style="margin-bottom:6px;">Imobiliárias de ${limitName(r.nome)} — funil (${periodo}) vs. média de ${PREV_3_MONTHS.map(monthLabel).join(', ')} no mesmo período</div>`;
+
+  const nomes = new Set();
+  [CURRENT_MONTH, ...PREV_3_MONTHS].forEach(mk=>{
+    Object.keys(funilMes(mk)).forEach(n=>nomes.add(n));
+    Object.keys(vendasMes(mk)).forEach(n=>nomes.add(n));
+  });
+  if(nomes.size === 0){
+    return `<div class="im-wrap">${titulo}<div style="font-size:12px; color:var(--muted);">Sem dados de imobiliárias para este supervisor (a planilha precisa trazer a coluna de imobiliária).</div></div>`;
+  }
+
+  const rows = Array.from(nomes).map(nome=>{
+    const now = imSomaPeriodo(entry, [CURRENT_MONTH], nome, D);
+    const past = imSomaPeriodo(entry, PREV_3_MONTHS, nome, D);
+    Object.keys(past).forEach(k=> past[k] = past[k] / 3);
+    const vNow = vendasMes(CURRENT_MONTH)[nome] || 0;
+    const vPast = PREV_3_MONTHS.reduce((a,mk)=> a + (vendasMes(mk)[nome]||0), 0) / 3;
+
+    const fMesAtual = funilMes(CURRENT_MONTH)[nome];
+    const nowAtiv = vNow > 0 || now.GANHO > 0 || IM_STAGES.some(st=> now[st.key] > 0 || (fMesAtual && (fMesAtual[st.key]||0) > 0));
+    const histAtiv = PREV_3_MONTHS.some(mk=>{
+      const f = funilMes(mk)[nome];
+      return (vendasMes(mk)[nome]||0) > 0 || (f && IM_STAGES.some(st=> (f[st.key]||0) > 0));
+    });
+
+    const faltas = [];
+    let semMovimento = false;
+    if(histAtiv && !nowAtiv) semMovimento = true;
+    else if(histAtiv){
+      if(past.LEAD >= IM_MIN_MEDIA_ALERTA && now.LEAD === 0) faltas.push('Sem Lead');
+      if(past.DOC_ENVIADA >= IM_MIN_MEDIA_ALERTA && now.DOC_ENVIADA === 0) faltas.push('Sem Doc. Enviada');
+      if(past.CPF_APROVADO >= IM_MIN_MEDIA_ALERTA && now.CPF_APROVADO === 0) faltas.push('Sem CPF Aprov.');
+      if(past.GANHO >= IM_MIN_MEDIA_ALERTA && now.GANHO === 0 && vNow === 0) faltas.push('Sem venda');
+    }
+    const nova = !histAtiv && nowAtiv;
+    return { nome, now, past, vNow, vPast, semMovimento, faltas, nova, histAtiv, nowAtiv };
+  }).filter(x => x.histAtiv || x.nowAtiv)
+    .sort((a,b)=> (b.now.LEAD - a.now.LEAD) || (b.now.DOC_ENVIADA - a.now.DOC_ENVIADA) || a.nome.localeCompare(b.nome));
+
+  // Lembrete: tinham funil antes e ainda não desenvolveram neste mês
+  const pendentes = rows.filter(x => x.nome !== IM_SEM_IMOB && (x.semMovimento || x.faltas.length > 0))
+    .sort((a,b)=> (b.semMovimento - a.semMovimento) || (b.faltas.length - a.faltas.length) || ((b.past.LEAD + b.past.DOC_ENVIADA) - (a.past.LEAD + a.past.DOC_ENVIADA)));
+  const ref = (x)=> `méd. 3M (mesmo período): ${x.past.LEAD.toFixed(1).replace('.',',')} lead · ${x.past.DOC_ENVIADA.toFixed(1).replace('.',',')} doc · ${x.past.CPF_APROVADO.toFixed(1).replace('.',',')} CPF · ${x.vPast.toFixed(1).replace('.',',')} vendas/mês`;
+  const alerta = pendentes.length === 0
+    ? `<div class="im-ok">✅ Todas as imobiliárias que tinham funil nos meses anteriores já têm movimento neste período.</div>`
+    : `<div class="im-alert">
+        <div class="im-alert-title">⚠️ Lembrete: ${pendentes.length} imobiliária${pendentes.length>1?'s':''} ainda não ${pendentes.length>1?'desenvolveram':'desenvolveu'} o funil neste período</div>
+        ${pendentes.map(x=>`<div class="im-alert-item">
+          <span><b title="${x.nome}">${x.nome}</b> ${x.semMovimento ? '<span class="im-chip">Sem movimento no mês</span>' : x.faltas.map(f=>`<span class="im-chip warn">${f}</span>`).join('')}</span>
+          <span class="im-alert-ref">${ref(x)}</span>
+        </div>`).join('')}
+      </div>`;
+
+  const tot = { now:{}, past:{}, vNow:0, vPast:0 };
+  Object.keys(DIA_STAGES).forEach(k=>{ tot.now[k]=0; tot.past[k]=0; });
+  rows.forEach(x=>{ Object.keys(DIA_STAGES).forEach(k=>{ tot.now[k]+=x.now[k]; tot.past[k]+=x.past[k]; }); tot.vNow += x.vNow; tot.vPast += x.vPast; });
+
+  const vendCell = (vNow, vPast)=> `<td><div class="cp-now">${fmtInt(vNow)}</div><div class="cp-prev">méd. ${vPast.toFixed(1).replace('.',',')}/mês</div></td>`;
+  const head = `<thead><tr><th class="im-name">Imobiliária</th>${IM_STAGES.map(st=>`<th>${st.label}</th>`).join('')}<th>Vendas (mês)</th><th class="im-name">Situação</th></tr></thead>`;
+  const totalRow = `<tr class="im-total"><td class="im-name">Total do supervisor</td>${IM_STAGES.map(st=>imCell(tot.now[st.key], tot.past[st.key])).join('')}${vendCell(tot.vNow, tot.vPast)}<td></td></tr>`;
+  const body = rows.map(x=>{
+    let status;
+    if(x.semMovimento) status = '<span class="im-chip">Sem movimento</span>';
+    else if(x.faltas.length) status = x.faltas.map(f=>`<span class="im-chip warn">${f}</span>`).join('');
+    else if(x.nova) status = '<span class="im-chip new">Nova no período</span>';
+    else status = '<span class="im-chip ok">Em andamento</span>';
+    return `<tr><td class="im-name" title="${x.nome}">${x.nome}</td>${IM_STAGES.map(st=>imCell(x.now[st.key], x.past[st.key])).join('')}${vendCell(x.vNow, x.vPast)}<td class="im-status">${status}</td></tr>`;
+  }).join('');
+
+  return `<div class="im-wrap">
+    ${titulo}
+    <div class="im-sub">Funil: valor do período e, embaixo, comparação com a média dos 3 meses anteriores nos mesmos dias (▲ acima · ▼ abaixo). Vendas: base de vendas assinadas, que é mensal — por isso a média é por mês fechado.</div>
+    ${alerta}
+    <div class="im-scroll"><table class="im-table">${head}<tbody>${totalRow}${body}</tbody></table></div>
+  </div>`;
+}
+
 function renderDetailRow(r, colspan){
   const convOut = pct(r.vendas, r.CPF_APROVADO);
   let topStatsHtml = '';
@@ -754,8 +1390,10 @@ function renderDetailRow(r, colspan){
         <div class="right-col">
           ${rightExtraHtml}
           ${compareHtml}
+          ${renderCorretorComparativoPeriodo(r)}
         </div>
       </div>
+      ${renderImobSection(r)}
     </div>
   </td></tr>`;
 }
@@ -838,6 +1476,23 @@ function getFilteredRows(){
 
 function renderAll(){
   const filterBar = document.getElementById('filterBar');
+  const captureArea = document.getElementById('captureArea');
+  const mainLegend = document.getElementById('mainLegend');
+  const fgView = document.getElementById('funilGerencialView');
+
+  if(CANAL === 'funil_gerencial'){
+    document.getElementById('subLabel').textContent = `Funil Gerencial — visão detalhada por gerente · Mês selecionado: ${monthLabel(CURRENT_MONTH)}`;
+    filterBar.style.display = 'none';
+    captureArea.style.display = 'none';
+    mainLegend.style.display = 'none';
+    document.getElementById('btnCopyImage').style.display = 'none';
+    fgView.style.display = 'block';
+    renderFunilGerencial();
+    return;
+  }
+  fgView.style.display = 'none';
+  captureArea.style.display = '';
+  mainLegend.style.display = 'flex';
 
   if(CANAL === 'rank_house' || CANAL === 'rank_imob'){
     const baseCanal = CANAL === 'rank_house' ? 'house' : 'imob';
@@ -865,6 +1520,516 @@ function renderAll(){
   if (CURRENT_MONTH === realCurrent) {
     document.getElementById('metaNote').textContent = `Meta automática: dia atual (${today.getDate()}) − 1`;
   }
+}
+
+/* ============================================================
+   FUNIL GERENCIAL — render
+=============================================================*/
+function renderFunilGerencial(){
+  const gerentes = getGerentesAtivosFG();
+  const select = document.getElementById('fgGerenteSelect');
+
+  if(gerentes.length === 0){
+    select.innerHTML = '<option>Nenhum gerente com ação neste mês</option>';
+    document.getElementById('fgComparePanel').style.display = 'none';
+    ['fgFunilRows','fgIndicadores','fgWeekTable','fgConvBadges','fgCorretorTable','fgDiagTable','fgConvInfo'].forEach(id=>{
+      document.getElementById(id).innerHTML = '';
+    });
+    return;
+  }
+  if(!selectedGerenteFG || !gerentes.includes(selectedGerenteFG)) selectedGerenteFG = gerentes[0];
+
+  select.innerHTML = gerentes.map(n=>`<option value="${n}" ${n===selectedGerenteFG?'selected':''}>${limitName(n)}</option>`).join('');
+
+  const entry = findEntry('house', selectedGerenteFG);
+  if(!entry) return;
+  const row = flattenEntry(entry, CURRENT_MONTH, true);
+
+  const metaVenda = (metaVendaPorGerente[selectedGerenteFG] !== undefined) ? metaVendaPorGerente[selectedGerenteFG] : FG_META_VENDA_BASE;
+  document.getElementById('fgMetaVenda').value = metaVenda;
+
+  const conversoes = computeConversoesGerente(entry, CURRENT_MONTH);
+  const metas = computeMetasReversas(metaVenda, conversoes);
+
+  renderFgFunilRows(row, metas);
+  renderFgConvInfo(conversoes);
+  renderFgCompare(entry);
+  renderFgIndicadores(entry, row, metas);
+  renderFgWeekTable(entry, row, metas);
+  renderFgCorretores(row, entry, conversoes);
+
+  document.getElementById('fgUpdated').textContent = `Atualizado em: ${new Date().toLocaleString('pt-BR')}`;
+}
+
+/* ============================================================
+   FUNIL GERENCIAL — comparar com performance anterior (MESMO DIA)
+   Pega o funil do gerente nos dias 1..D do mês selecionado e compara com
+   o funil dos meses anteriores nos mesmos dias 1..D, para ver de qual mês
+   ele está mais próximo. Mês corrente: D = hoje; mês fechado: mês inteiro.
+   A "distância" de cada mês é o desvio relativo médio entre as 6 etapas:
+   |atual − passado| ÷ média dos dois (0 = idêntico).
+   Venda aqui vem do funil (Ganho), pois a base de vendas é mensal.
+=============================================================*/
+let fgCompareOpen = false;
+function fgSomaDia(entry, mk, maxDay){
+  const out = {};
+  Object.keys(DIA_STAGES).forEach(k=> out[k]=0);
+  const dias = entry.dia_por_mes && entry.dia_por_mes[mk];
+  if(dias) Object.keys(dias).forEach(d=>{
+    if(+d > maxDay) return;
+    Object.keys(dias[d]).forEach(st=>{ out[st] += dias[d][st]; });
+  });
+  return out;
+}
+function renderFgCompare(entry){
+  const panel = document.getElementById('fgComparePanel');
+  const btn = document.getElementById('fgCompareBtn');
+  btn.classList.toggle('on', fgCompareOpen);
+  btn.textContent = fgCompareOpen ? '✖ Ocultar comparação' : '📊 Comparar com performance anterior';
+  if(!fgCompareOpen){ panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+
+  const D = cpCutoffDay();
+  const ehMesCorrente = CURRENT_MONTH === monthKeyFromDate(new Date());
+  const periodo = ehMesCorrente ? `dias 1 a ${D}` : 'mês completo';
+  document.getElementById('fgCompareTitle').textContent = `Comparação com performance anterior — ${periodo}`;
+  const body = document.getElementById('fgCompareBody');
+
+  const passados = Object.keys(entry.dia_por_mes || {})
+    .filter(mk => mk < CURRENT_MONTH)
+    .filter(mk => { const t = fgSomaDia(entry, mk, 31); return Object.keys(t).some(k=>t[k] > 0); })
+    .sort().slice(-6);
+  if(passados.length === 0){
+    body.innerHTML = `<div style="font-size:12.5px; color:var(--muted);">Este gerente não tem meses anteriores com dados diários para comparar.</div>`;
+    return;
+  }
+
+  const atual = fgSomaDia(entry, CURRENT_MONTH, D);
+  const dados = passados.map(mk=>{
+    const v = fgSomaDia(entry, mk, D);
+    let somaDesvio = 0, acima = 0;
+    FG_STAGE_ROWS.forEach(st=>{
+      const c = atual[st.key], p = v[st.key];
+      somaDesvio += (c === 0 && p === 0) ? 0 : Math.abs(c - p) / ((c + p) / 2);
+      if(c >= p) acima++;
+    });
+    return { mk, v, desvio: somaDesvio / FG_STAGE_ROWS.length, acima };
+  });
+  const melhor = dados.reduce((m,x)=> x.desvio < m.desvio ? x : m, dados[0]);
+
+  const resumo = `${limitName(entry.nome)} está, até ${ehMesCorrente ? 'o dia ' + D : 'o fim do mês'}, mais próximo de <b>${monthLabel(melhor.mk)}</b> ` +
+    `(desvio médio de ${(melhor.desvio*100).toFixed(0)}% entre as etapas). Acima desse mês em ${melhor.acima} de ${FG_STAGE_ROWS.length} etapas.`;
+
+  const head = `<thead><tr><th style="text-align:left">Etapa</th>
+    <th class="fg-week-group">${monthLabel(CURRENT_MONTH)} (atual)</th>
+    ${dados.map(x=>`<th class="${x.mk===melhor.mk?'fg-cmp-best':''}">${monthLabel(x.mk)}${x.mk===melhor.mk?' 🎯':''}</th>`).join('')}</tr></thead>`;
+
+  const rows = FG_STAGE_ROWS.map(st=>{
+    const c = atual[st.key];
+    const cells = dados.map(x=>{
+      const p = x.v[st.key];
+      let delta = '<span class="fg-cmp-delta" style="color:var(--muted)">=</span>';
+      if(p > 0){
+        const rel = (c - p) / p * 100;
+        if(Math.abs(rel) >= 0.5) delta = `<span class="fg-cmp-delta ${rel>0?'fg-cmp-up':'fg-cmp-down'}">atual ${rel>0?'▲ +':'▼ '}${rel.toFixed(0)}%</span>`;
+      } else if(c > 0){
+        delta = '<span class="fg-cmp-delta fg-cmp-up">atual ▲ (mês sem base)</span>';
+      }
+      return `<td class="${x.mk===melhor.mk?'fg-cmp-best':''}">${fmtInt(p)}${delta}</td>`;
+    }).join('');
+    return `<tr><td class="fg-stage-label">${st.label}${st.key==='GANHO'?'<sup>*</sup>':''}</td><td class="fg-total-real">${fmtInt(c)}</td>${cells}</tr>`;
+  }).join('');
+
+  const foot = `<tr class="fg-cmp-foot"><td class="fg-stage-label">Desvio médio vs. atual</td><td>—</td>
+    ${dados.map(x=>`<td class="${x.mk===melhor.mk?'fg-cmp-best':''}">${(x.desvio*100).toFixed(0)}%<span class="fg-cmp-delta" style="color:var(--muted)">atual acima em ${x.acima}/${FG_STAGE_ROWS.length} etapas</span></td>`).join('')}</tr>`;
+
+  body.innerHTML = `<div class="fg-cmp-resumo">${resumo}</div>
+    <table class="fg-week-table">${head}<tbody>${rows}${foot}</tbody></table>
+    <div class="fg-convinfo-note" style="margin-top:8px;">Cada mês passado mostra o funil acumulado nos mesmos dias do mês atual. * Venda vem do funil (Ganho), pois a base de vendas assinadas é mensal.</div>`;
+}
+
+// Mostra de onde vieram as conversões usadas na meta (transparência)
+function renderFgConvInfo(conversoes){
+  const nomes = { DOC_ENVIADA:'Lead→Doc', DOC_ANALISE:'Doc→Pend./Análise', CPF_ANALISADO:'Pend.→CPF Anl.', CPF_APROVADO:'CPF Anl.→Aprov.', GANHO:'Aprov.→Venda' };
+  const regraTxt = { desafio:'desafio por faixas', min:'menor entre gerente e diretoria', max:'maior entre gerente e diretoria' };
+  const p = (v)=> v===null ? '—' : fmtPct(v*100);
+  const itens = conversoes.map(c=>{
+    const base = `${nomes[c.to]} ${fmtPct(c.rate*100)}`;
+    const tip = `Gerente: ${p(c.K)} | Regional: ${p(c.J)} | Diretoria: ${p(c.N)} | Regra: ${regraTxt[c.regra]}`;
+    if(c.fonte === 'padrao'){
+      return `<span class="fg-conv-chip fg-conv-chip-fallback" title="Sem histórico no ano — percentual padrão">${base}*</span>`;
+    }
+    if(c.desafio){
+      return `<span class="fg-conv-chip fg-conv-chip-desafio" title="${tip}">🎯 ${base} <small>(hist. ${p(c.K)})</small></span>`;
+    }
+    const origem = c.fonte === 'gerente' ? '' : ` <small>(${c.fonte})</small>`;
+    return `<span class="fg-conv-chip" title="${tip}">${base}${origem}</span>`;
+  }).join('');
+  const temPadrao = conversoes.some(c=>c.fonte==='padrao');
+  document.getElementById('fgConvInfo').innerHTML =
+    `<div class="fg-convinfo-title">Conversões usadas na meta (histórico do ano até o mês anterior · gerente → regional → diretoria)</div>${itens}` +
+    (temPadrao ? `<div class="fg-convinfo-note">* sem histórico de nenhum nível — percentual padrão</div>` : '') +
+    `<div class="fg-convinfo-note">Passe o mouse em cada conversão para ver gerente / regional / diretoria.</div>`;
+}
+
+// Escala das barras: o Lead usa a escala dele (barra mais longa, 100%) e as
+// demais etapas dividem uma escala única, proporcional ao maior número do
+// funil SEM o Lead. O maior número do restante ocupa FG_REST_MAX_PCT da
+// barra, para o Lead continuar sendo sempre a maior.
+const FG_REST_MAX_PCT = 80;
+function fgBarHtml(kind, value, widthPct){
+  const w = Math.max(widthPct, 2);
+  const narrow = w < 14; // barra curta: o número vai pra fora, pra não ficar cortado
+  return `<div class="fg-bar-wrap"><div class="fg-bar ${kind}${narrow?' narrow':''}" style="width:${w}%"><span class="fg-bar-val">${fmtInt(value)}</span></div></div>`;
+}
+function renderFgFunilRows(row, metas){
+  const container = document.getElementById('fgFunilRows');
+  const valores = FG_STAGE_ROWS.map(s=>({
+    key: s.key, label: s.label,
+    real: (s.key === 'GANHO' ? row.vendas : row[s.key]) || 0,
+    meta: Math.round(metas[s.key] || 0),
+  }));
+  const maxLead = Math.max(...valores.filter(v=>v.key==='LEAD').map(v=>Math.max(v.real, v.meta)), 1);
+  const maxResto = Math.max(...valores.filter(v=>v.key!=='LEAD').map(v=>Math.max(v.real, v.meta)), 1);
+
+  let html = '';
+  valores.forEach(v=>{
+    const base = v.key === 'LEAD' ? maxLead : maxResto;
+    const cap  = v.key === 'LEAD' ? 100 : FG_REST_MAX_PCT;
+    const metaWidth = (v.meta / base) * cap;
+    const realWidth = (v.real / base) * cap;
+    const gap = Math.round(v.real - v.meta);
+    const gapClass = gap >= 0 ? 'gap-pos' : 'gap-neg';
+    html += `
+      <div class="fg-row">
+        <div class="fg-label">${v.label}</div>
+        ${fgBarHtml('meta', v.meta, metaWidth)}
+        ${fgBarHtml('real', v.real, realWidth)}
+        <div class="fg-gap ${gapClass}">${gap>0?'+':''}${gap}</div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderFgIndicadores(entry, row, metas){
+  const corretorFunilMonth = (entry.corretor_funil_por_mes && entry.corretor_funil_por_mes[CURRENT_MONTH]) || {};
+  const nCoe = Object.keys(corretorFunilMonth).filter(n => (corretorFunilMonth[n].LEAD||0) > 0).length;
+
+  const vendasPorNome = {};
+  (row.corretores || []).forEach(c=>{ vendasPorNome[c.nome] = (vendasPorNome[c.nome]||0) + c.vendas; });
+  const coeProd = Object.keys(vendasPorNome).filter(n => vendasPorNome[n] >= 1).length;
+
+  const convReal = pct(row.vendas, row.LEAD);
+  const convMeta = metas.LEAD > 0 ? (metas.GANHO / metas.LEAD) * 100 : null;
+
+  document.getElementById('fgIndicadores').innerHTML = `
+    <div class="fg-ind-card">
+      <div class="fg-ind-label">Nº de Corretores</div>
+      <div class="fg-ind-value">${fmtInt(nCoe)}</div>
+      <div class="fg-ind-meta">receberam Lead no mês</div>
+    </div>
+    <div class="fg-ind-card">
+      <div class="fg-ind-label">Corretores Produtivos</div>
+      <div class="fg-ind-value">${fmtInt(coeProd)}</div>
+      <div class="fg-ind-meta">com ≥1 venda no mês</div>
+    </div>
+    <div class="fg-ind-card wide">
+      <div class="fg-ind-label">Conversão Lead → Venda</div>
+      <div class="fg-ind-value">${fmtPct(convReal)}</div>
+      <div class="fg-ind-meta">Meta: ${fmtPct(convMeta)}</div>
+    </div>
+  `;
+}
+
+function renderFgWeekTable(entry, row, metas){
+  const semanasMonth = (entry.semanas_por_mes && entry.semanas_por_mes[CURRENT_MONTH]) || {};
+  const realCurrentMonth = monthKeyFromDate(new Date());
+  const todayDay = (CURRENT_MONTH === realCurrentMonth) ? today.getDate() : 31; // mês fechado = todas as semanas "já passaram"
+  const totals = {};
+  FG_STAGE_ROWS.forEach(s=> totals[s.key] = {real:0, meta:0});
+  const metaSemanal = {};
+  FG_STAGE_ROWS.forEach(s=>{ metaSemanal[s.key] = fgMetaPorSemana(metas[s.key], FG_DISTRIBUICAO_SEMANAL[s.key]); });
+
+  let rowsHtml = '';
+  FG_STAGE_ROWS.forEach(s=>{
+    let cells = '';
+    for(let w=1; w<=5; w++){
+      const weekData = semanasMonth[w] || {};
+      const real = weekData[s.key] || 0;
+      const weekStarted = FG_WEEK_START_DAY[w] <= todayDay;
+      const metaWeek = weekStarted ? metaSemanal[s.key][w-1] : 0;
+      totals[s.key].real += real;
+      totals[s.key].meta += metaWeek;
+      cells += `<td class="fg-real">${fmtInt(real)}</td><td class="fg-meta">${fmtInt(metaWeek)}</td>`;
+    }
+    // Venda: o total do mês vem da base de vendas (mesma da tabela principal);
+    // por semana só existe o funil (GANHO), pois a base de vendas é mensal.
+    const totalReal = (s.key === 'GANHO') ? (row.vendas || 0) : totals[s.key].real;
+    const totalMeta = totals[s.key].meta;
+    const ating = totalReal - totalMeta;
+    const atingClass = ating >= 0 ? 'fg-ating-pos' : 'fg-ating-neg';
+    rowsHtml += `<tr>
+      <td class="fg-stage-label">${s.label}${s.key==='GANHO' ? '<sup title="Total do mês = base de vendas; semanas = funil (GANHO)">*</sup>' : ''}</td>
+      ${cells}
+      <td class="fg-total-real">${fmtInt(totalReal)}</td>
+      <td class="fg-total-meta">${fmtInt(totalMeta)}</td>
+      <td class="${atingClass}">${ating>0?'+':''}${ating}</td>
+    </tr>`;
+  });
+
+  const headHtml = `
+    <thead>
+      <tr>
+        <th rowspan="2" style="vertical-align:middle;">Funil</th>
+        ${[1,2,3,4,5].map(w=>`<th colspan="2" class="fg-week-group">Semana ${w}</th>`).join('')}
+        <th colspan="3" class="fg-week-group">Total</th>
+      </tr>
+      <tr>
+        ${[1,2,3,4,5].map(()=>`<th>Real</th><th>Meta</th>`).join('')}
+        <th>Real</th><th>Meta</th><th>Ating</th>
+      </tr>
+    </thead>`;
+  document.getElementById('fgWeekTable').innerHTML = headHtml + `<tbody>${rowsHtml}</tbody>`;
+
+  const monthReal = entry.months[CURRENT_MONTH] || {};
+  const leadDocReal = pct(monthReal.DOC_ENVIADA, monthReal.LEAD);
+  const cpfVendaReal = pct(row.vendas, monthReal.CPF_APROVADO);
+
+  function convBadgeHtml(label, value, range){
+    const col = heatColor(value===null?null:value, range[0], range[1]);
+    return `<div class="fg-conv-badge" style="background:${col.bg};">
+      <span class="fg-conv-label" style="color:${col.fg};">${label}</span>
+      <span class="fg-conv-value" style="background:rgba(255,255,255,0.6); color:${col.fg};">${fmtPct(value)}</span>
+    </div>`;
+  }
+  const distTxt = FG_STAGE_ROWS.map(st=>`<span class="fg-dist-item"><b>${st.label}</b> ${FG_DISTRIBUICAO_SEMANAL[st.key].join('/')}%</span>`).join('');
+  document.getElementById('fgDistInfo').innerHTML =
+    `<div class="fg-convinfo-title">Distribuição da meta mensal por semana (S1/S2/S3/S4/S5)</div>${distTxt}`;
+  document.getElementById('fgConvBadges').innerHTML =
+    convBadgeHtml('Conversão Lead → Doc', leadDocReal, [10,13]) +
+    convBadgeHtml('Conversão CPF → Venda', cpfVendaReal, [20,33]);
+}
+
+/* ------------------------------------------------------------
+   CORRETORES DA EQUIPE — abas (Funil / Diagnóstico) e ordenação
+------------------------------------------------------------*/
+let fgCorretorTab = 'funil';                 // 'funil' | 'diag'
+let fgSortFunil = { key:'lead', dir:-1 };    // padrão: mais leads primeiro
+let fgSortDiag  = { key:'nAlertas', dir:-1 };// padrão: mais alertas primeiro
+let fgDiagSoAlerta = false;
+let fgCorretorCtx = null;                    // {row, entry, conversoes}
+
+// Diagnóstico: cada elo do funil, a meta de conversão e a dificuldade que sinaliza
+const DIAG_STEPS = [
+  { id:'lead_doc',     label:'Lead → Doc',            denKey:'lead',     numKey:'doc',      diag:'Dificuldade no atendimento de clientes' },
+  { id:'doc_cpf',      label:'Doc Pend. → CPF Anl.',  denKey:'docA',     numKey:'cpfA',     diag:'Dificuldade na coleta de documentações' },
+  { id:'cpf_aprov',    label:'CPF Anl. → Aprov.',     denKey:'cpfA',     numKey:'cpfAp',    diag:'Dificuldade no manejo financeiro do cliente' },
+  { id:'aprov_gerado', label:'CPF Aprov. → Gerado',   denKey:'cpfAp',    numKey:'contrato', diag:'Dificuldade no fechamento da venda' },
+  { id:'gerado_venda', label:'Gerado → Venda',        denKey:'contrato', numKey:'vendas',   diag:'Dificuldade no fechamento da venda' },
+];
+// Amostra mínima (denominador) pra um elo poder gerar alerta — evita
+// sinalizar corretor com 1 ou 2 casos. Ajuste aqui se quiser mais/menos rigor.
+const DIAG_MIN_AMOSTRA = { lead:10, docA:3, cpfA:3, cpfAp:3, contrato:3 };
+
+// Meta de conversão de cada elo, para o gerente selecionado.
+// - Lead→Doc: a meta usada no funil (histórico do gerente com o desafio).
+// - Doc Pend.→CPF Anl. e CPF Anl.→Aprov.: conversão histórica do gerente
+//   (só quando existe histórico no ano; sem histórico não avalia).
+// - CPF Aprov.→Gerado e Gerado→Venda: não havia meta definida; usa a média
+//   histórica do gerente (mesma regra), também só quando há histórico.
+function computeMetasDiagnostico(entry, monthKey, conversoes){
+  const get = (to)=> conversoes.find(c=>c.to===to);
+  const histRate = (fromStage, toStage)=> convHierarquia(entry, fromStage, toStage, monthKey);
+  const ld = get('DOC_ENVIADA'), dc = get('CPF_ANALISADO'), ca = get('CPF_APROVADO');
+  return [
+    ld.rate,
+    dc.usouHistorico ? dc.rate : null,
+    ca.usouHistorico ? ca.rate : null,
+    histRate('CPF_APROVADO', 'CONTRATO_GERADO'),
+    histRate('CONTRATO_GERADO', 'GANHO'),
+  ];
+}
+
+function fgSortRows(rows, sort, getVal){
+  const dir = sort.dir;
+  return rows.slice().sort((a,b)=>{
+    const va = getVal(a, sort.key), vb = getVal(b, sort.key);
+    if(sort.key === 'nome') return dir * String(va).localeCompare(String(vb));
+    const na = (va === null || va === undefined), nb = (vb === null || vb === undefined);
+    if(na && nb) return 0;
+    if(na) return 1;   // sem valor vai sempre pro fim, qualquer que seja a direção
+    if(nb) return -1;
+    return dir * (va - vb);
+  });
+}
+function fgHeaderCell(label, key, sort, left){
+  const arrow = sort.key === key ? `<span class="fg-arrow">${sort.dir===1?'▲':'▼'}</span>` : '';
+  return `<th class="fg-sortable ${left?'fg-c-left':''}" data-sort="${key}">${label}${arrow}</th>`;
+}
+function fgBindSort(tableId, sort, rerender){
+  document.getElementById(tableId).querySelectorAll('th[data-sort]').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.dataset.sort;
+      if(sort.key === k) sort.dir *= -1; else { sort.key = k; sort.dir = (k === 'nome') ? 1 : -1; }
+      rerender();
+    });
+  });
+}
+
+function fgCorretoresBase(row){
+  const funil = row.corretor_funil || {};
+  const vendasPorNome = {};
+  (row.corretores || []).forEach(c=>{ vendasPorNome[c.nome] = (vendasPorNome[c.nome]||0) + c.vendas; });
+  const nomes = new Set([...Object.keys(funil), ...Object.keys(vendasPorNome)]);
+  return Array.from(nomes).map(nome=>{
+    const f = funil[nome] || {};
+    return {
+      nome,
+      lead: f.LEAD||0, doc: f.DOC_ENVIADA||0, docA: f.DOC_ANALISE||0,
+      cpfA: f.CPF_ANALISADO||0, cpfAp: f.CPF_APROVADO||0, contrato: f.CONTRATO_GERADO||0,
+      vendas: vendasPorNome[nome] || 0
+    };
+  });
+}
+
+function renderFgCorretores(row, entry, conversoes){
+  fgCorretorCtx = { row, entry, conversoes };
+  renderFgCorretorTable();
+  renderFgDiagTable();
+  applyFgCorretorTab();
+}
+function applyFgCorretorTab(){
+  document.getElementById('fgCorretorTable').style.display = fgCorretorTab === 'funil' ? '' : 'none';
+  document.getElementById('fgDiagWrap').style.display = fgCorretorTab === 'diag' ? 'block' : 'none';
+  document.getElementById('fgTabFunil').classList.toggle('active', fgCorretorTab === 'funil');
+  document.getElementById('fgTabDiag').classList.toggle('active', fgCorretorTab === 'diag');
+}
+
+function renderFgCorretorTable(){
+  if(!fgCorretorCtx) return;
+  const rows = fgSortRows(fgCorretoresBase(fgCorretorCtx.row), fgSortFunil, (r,k)=> r[k]);
+
+  const totals = rows.reduce((acc,r)=>{
+    acc.lead+=r.lead; acc.doc+=r.doc; acc.docA+=r.docA; acc.cpfA+=r.cpfA;
+    acc.cpfAp+=r.cpfAp; acc.contrato+=r.contrato; acc.vendas+=r.vendas;
+    return acc;
+  }, {lead:0,doc:0,docA:0,cpfA:0,cpfAp:0,contrato:0,vendas:0});
+
+  function convCell(num, den){
+    const v = pct(num, den);
+    return v===null ? '' : `<div class="fg-conv-cell">${fmtPct(v)}</div>`;
+  }
+
+  const S = fgSortFunil;
+  const headHtml = `<thead><tr>
+    ${fgHeaderCell('Corretor','nome',S,true)}${fgHeaderCell('Lead','lead',S)}${fgHeaderCell('Doc Enviada','doc',S)}${fgHeaderCell('Doc Pend/Anl.','docA',S)}
+    ${fgHeaderCell('CPF Analisado','cpfA',S)}${fgHeaderCell('CPF Aprov/Cond','cpfAp',S)}${fgHeaderCell('Contrato Gerado','contrato',S)}${fgHeaderCell('Vendas','vendas',S)}
+  </tr></thead>`;
+
+  let bodyHtml = `<tr class="fg-total-row">
+    <td class="fg-c-left">Total</td>
+    <td>${fmtInt(totals.lead)}</td>
+    <td>${fmtInt(totals.doc)}${convCell(totals.doc,totals.lead)}</td>
+    <td>${fmtInt(totals.docA)}</td>
+    <td>${fmtInt(totals.cpfA)}</td>
+    <td>${fmtInt(totals.cpfAp)}</td>
+    <td>${fmtInt(totals.contrato)}</td>
+    <td>${fmtInt(totals.vendas)}${convCell(totals.vendas,totals.cpfAp)}</td>
+  </tr>`;
+
+  rows.forEach(r=>{
+    bodyHtml += `<tr>
+      <td class="fg-c-left" title="${r.nome}">${shortName(r.nome)}</td>
+      <td>${fmtInt(r.lead)}</td>
+      <td>${fmtInt(r.doc)}${convCell(r.doc,r.lead)}</td>
+      <td>${fmtInt(r.docA)}</td>
+      <td>${fmtInt(r.cpfA)}</td>
+      <td>${fmtInt(r.cpfAp)}</td>
+      <td>${fmtInt(r.contrato)}</td>
+      <td>${fmtInt(r.vendas)}${convCell(r.vendas,r.cpfAp)}</td>
+    </tr>`;
+  });
+
+  document.getElementById('fgCorretorTable').innerHTML = headHtml + `<tbody>${bodyHtml}</tbody>`;
+  fgBindSort('fgCorretorTable', fgSortFunil, renderFgCorretorTable);
+}
+
+function renderFgDiagTable(){
+  if(!fgCorretorCtx) return;
+  const { row, entry, conversoes } = fgCorretorCtx;
+  const metas = computeMetasDiagnostico(entry, CURRENT_MONTH, conversoes);
+
+  let rows = fgCorretoresBase(row).map(r=>{
+    const steps = DIAG_STEPS.map((st,i)=>{
+      const den = r[st.denKey], num = r[st.numKey];
+      const rate = den > 0 ? num / den : null;
+      const meta = metas[i];
+      const amostraOk = den >= DIAG_MIN_AMOSTRA[st.denKey];
+      const alerta = amostraOk && meta !== null && rate !== null && rate < meta;
+      return { rate, meta, num, den, amostraOk, alerta };
+    });
+    const diagnosticos = [];
+    steps.forEach((x,i)=>{ if(x.alerta && !diagnosticos.includes(DIAG_STEPS[i].diag)) diagnosticos.push(DIAG_STEPS[i].diag); });
+    return Object.assign({}, r, { steps, diagnosticos, nAlertas: steps.filter(x=>x.alerta).length });
+  });
+
+  if(fgDiagSoAlerta) rows = rows.filter(r=>r.nAlertas > 0);
+
+  rows = fgSortRows(rows, fgSortDiag, (r,k)=>{
+    if(k === 'nome') return r.nome;
+    if(k === 'nAlertas') return r.nAlertas;
+    const i = DIAG_STEPS.findIndex(st=>st.id===k);
+    return i >= 0 ? r.steps[i].rate : null;
+  });
+
+  // Linha "Equipe" (total do gerente) e linha "Meta"
+  const tot = fgCorretoresBase(row).reduce((acc,r)=>{
+    ['lead','doc','docA','cpfA','cpfAp','contrato','vendas'].forEach(k=> acc[k]+=r[k]);
+    return acc;
+  }, {lead:0,doc:0,docA:0,cpfA:0,cpfAp:0,contrato:0,vendas:0});
+
+  const S = fgSortDiag;
+  const headHtml = `<thead><tr>
+    ${fgHeaderCell('Corretor','nome',S,true)}
+    ${DIAG_STEPS.map(st=>fgHeaderCell(st.label, st.id, S)).join('')}
+    ${fgHeaderCell('Alertas','nAlertas',S)}
+    <th class="fg-c-left">Precisa de ajuda em</th>
+  </tr></thead>`;
+
+  const metaRow = `<tr class="fg-meta-row"><td class="fg-c-left">Meta de conversão</td>
+    ${metas.map(m=>`<td>${m===null ? '—' : fmtPct(m*100)}</td>`).join('')}<td></td><td class="fg-d-help"></td></tr>`;
+  const equipeRow = `<tr class="fg-total-row"><td class="fg-c-left">Equipe (total)</td>
+    ${DIAG_STEPS.map(st=>{ const v = tot[st.denKey]>0 ? tot[st.numKey]/tot[st.denKey]*100 : null; return `<td>${fmtPct(v)}</td>`; }).join('')}<td></td><td class="fg-d-help"></td></tr>`;
+
+  const body = rows.map(r=>{
+    const cells = r.steps.map(x=>{
+      let cls = 'fg-d-na', inner = '—';
+      if(x.rate !== null){
+        inner = `<div class="fg-d-rate">${fmtPct(x.rate*100)}</div><div class="fg-conv-cell">${x.num}/${x.den}</div>`;
+        if(x.alerta) cls = 'fg-d-bad';
+        else if(x.amostraOk && x.meta !== null) cls = 'fg-d-ok';
+        else cls = 'fg-d-na';
+      }
+      return `<td class="${cls}">${inner}</td>`;
+    }).join('');
+    const help = r.diagnosticos.length
+      ? r.diagnosticos.map(d=>`<span class="fg-diag-chip">${d}</span>`).join('')
+      : (r.steps.some(x=>x.amostraOk) ? `<span class="fg-diag-chip ok">Sem alertas</span>` : `<span style="color:var(--muted); font-size:11px;">Amostra insuficiente</span>`);
+    return `<tr>
+      <td class="fg-c-left" title="${r.nome}">${shortName(r.nome)}</td>
+      ${cells}
+      <td><b>${r.nAlertas}</b></td>
+      <td class="fg-d-help">${help}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('fgDiagTable').innerHTML = headHtml + `<tbody>${metaRow}${equipeRow}${body}</tbody>`;
+  fgBindSort('fgDiagTable', fgSortDiag, renderFgDiagTable);
+
+  document.getElementById('fgDiagNote').innerHTML =
+    `Alerta = conversão do corretor abaixo da meta de conversão do gerente (histórico do ano até o mês anterior, com a mesma regra do funil: gerente → regional → diretoria; Lead→Doc usa a meta com desafio), ` +
+    `com amostra mínima (Lead ≥ ${DIAG_MIN_AMOSTRA.lead}; demais elos ≥ ${DIAG_MIN_AMOSTRA.docA} casos). ` +
+    `Elos sem nenhum histórico ficam sem meta ("—") e não geram alerta. "Gerado → Venda" usa a base de vendas assinadas.`;
 }
 
 /* ============================================================
@@ -910,6 +2075,36 @@ function parseExcelDate(val) {
     }
 
     return s;
+}
+
+// Extrai só o DIA do mesmo valor de data (mesmos formatos aceitos acima).
+// Usado pra bucketizar em semanas (ver weekOfMonth). Retorna null quando
+// o formato não traz dia (ex: 'mmm/yyyy').
+function dayOfMonthFromExcelVal(val){
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'number') {
+        const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+        return d.getUTCDate();
+    }
+    let s = String(val).trim().toLowerCase();
+    if (s.match(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/)) {
+        const [d] = s.split('/');
+        return parseInt(d, 10) || null;
+    }
+    if (s.match(/^\d{4}-\d{2}-\d{2}/)) {
+        return parseInt(s.substring(8,10), 10) || null;
+    }
+    return null;
+}
+const DIA_STAGES = { LEAD:1, DOC_ENVIADA:1, DOC_ANALISE:1, CPF_ANALISADO:1, CPF_APROVADO:1, CONTRATO_GERADO:1, GANHO:1 };
+// SEMANA 1(1-7) · 2(8-14) · 3(15-21) · 4(22-28) · 5(29-31)
+function weekOfMonth(day){
+    if(day===null || day===undefined) return null;
+    if(day<=7) return 1;
+    if(day<=14) return 2;
+    if(day<=21) return 3;
+    if(day<=28) return 4;
+    return 5;
 }
 
 const STAGE_KEYS = ['LEAD','DOC_ENVIADA','DOC_ANALISE','CPF_ANALISADO','CPF_APROVADO','CONTRATO_GERADO','CONTRATO_ASSINADO','REPASSE','GANHO','REGISTRO'];
@@ -968,22 +2163,80 @@ function parseWorkbook(ab){
   const C_reg = colMap['regional'] !== undefined ? colMap['regional'] : 8;
   const C_val = colMap['Funil_Real'] !== undefined ? colMap['Funil_Real'] : 9;
 
-  const C_db2 = colMap['DataBase'] !== undefined ? colMap['DataBase'] : 12;
-  const C_reg2 = colMap['regional_co'] !== undefined ? colMap['regional_co'] : 13;
-  const C_ger2 = colMap['nom_gerente'] !== undefined ? colMap['nom_gerente'] : 14;
-  const C_tot = colMap['TotalCorretores'] !== undefined ? colMap['TotalCorretores'] : 15;
-  const C_inativos = colMap['TotalCorretoresMais10DiasSemLogin'] !== undefined ? colMap['TotalCorretoresMais10DiasSemLogin'] : 16;
+  // Cada tabela pode ter o cabeçalho em uma linha diferente (e as colunas
+  // mudam de lugar quando o Excel ganha colunas novas). Por isso cada tabela
+  // procura os PRÓPRIOS cabeçalhos pelo nome, nas primeiras linhas da aba.
+  function findHdr(names, opts){
+    opts = opts || {};
+    const norm = (v)=> opts.loose ? String(v).toLowerCase().replace(/[^a-z0-9#]/g,'') : String(v).trim();
+    const wanted = names.map(norm);
+    const scan = (r)=>{
+      const rw = grid[r] || [];
+      for(let c=0; c<rw.length; c++){
+        if(typeof rw[c] === 'string' && wanted.includes(norm(rw[c]))) return {r, c};
+      }
+      return null;
+    };
+    if(opts.row !== undefined){
+      const p = scan(opts.row);
+      if(p || opts.rowOnly) return p;
+    }
+    for(let r=0; r<Math.min(25, grid.length); r++){ const p = scan(r); if(p) return p; }
+    return null;
+  }
 
-  const C_db3 = colMap['DataBaseAssinaturaContratoSalesforce'] !== undefined ? colMap['DataBaseAssinaturaContratoSalesforce'] : 17;
-  const C_ger3 = colMap['NomeGerente'] !== undefined ? colMap['NomeGerente'] : 18;
-  const C_corr3 = colMap['NomeCorretor'] !== undefined ? colMap['NomeCorretor'] : 19;
-  const C_loja3 = colMap['NomeLoja'] !== undefined ? colMap['NomeLoja'] : 20;
-  const C_vendas = colMap['# Vendas'] !== undefined ? colMap['# Vendas'] : 21;
+  // Tabela 1 (funil) — nova coluna: nom_imobiliaria
+  const pImob1 = findHdr(['nom_imobiliaria','nom_imobiliária','nome_imobiliaria'], {row: headerRowIdx, rowOnly: true, loose: true});
+  const C_imob = pImob1 ? pImob1.c : undefined;
+
+  // Tabela 2 (equipe)
+  const pDb2 = findHdr(['DataBase']);
+  const H2 = pDb2 ? pDb2.r : headerRowIdx;
+  const col2 = (name, fb)=>{ const p = findHdr([name], {row:H2}); return p ? p.c : fb; };
+  const C_db2 = pDb2 ? pDb2.c : 12;
+  const C_reg2 = col2('regional_co', C_db2 + 1);
+  const C_ger2 = col2('nom_gerente', C_db2 + 2);
+  const C_tot = col2('TotalCorretores', C_db2 + 3);
+  const C_inativos = col2('TotalCorretoresMais10DiasSemLogin', C_db2 + 4);
+
+  // Tabela 3 (vendas) — nova coluna: NomeImobiliaria
+  const pDb3 = findHdr(['DataBaseAssinaturaContratoSalesforce']);
+  const H3 = pDb3 ? pDb3.r : headerRowIdx;
+  const col3 = (name, fb)=>{ const p = findHdr([name], {row:H3}); return p ? p.c : fb; };
+  const C_db3 = pDb3 ? pDb3.c : 17;
+  const C_ger3 = col3('NomeGerente', C_db3 + 1);
+  const C_corr3 = col3('NomeCorretor', C_db3 + 2);
+  const C_loja3 = col3('NomeLoja', C_db3 + 3);
+  const pImob3 = findHdr(['NomeImobiliaria','NomeImobiliária'], {row: H3, rowOnly: true, loose: true});
+  const C_imob3 = pImob3 ? pImob3.c : undefined;
+  const C_vendas = col3('# Vendas', C_imob3 !== undefined ? C_imob3 + 1 : C_db3 + 4);
+  const SEM_IMOB = '(sem imobiliária)';
+  const cleanTxt = (v)=> String(v === undefined || v === null ? '' : v).replace(/^\+\s*/, '').trim();
 
   const house = {};
   const imob = {};
   function ensure(map, name){ if(!map[name]) map[name] = {regional:null, months:{}}; return map[name]; }
   function ensureMonth(entry, mk){ if(!entry.months[mk]) entry.months[mk] = {}; STAGE_KEYS.forEach(s=>{ if(entry.months[mk][s]===undefined) entry.months[mk][s]=0; }); return entry.months[mk]; }
+  // Funil por corretor e por semana (usados na aba "Funil Gerencial").
+  // Só preenchidos pra HOUSE.
+  function ensureCorretorFunilMonth(entry, mk, corretorNome){
+    if(!entry.corretor_funil_por_mes) entry.corretor_funil_por_mes = {};
+    if(!entry.corretor_funil_por_mes[mk]) entry.corretor_funil_por_mes[mk] = {};
+    if(!entry.corretor_funil_por_mes[mk][corretorNome]){
+      entry.corretor_funil_por_mes[mk][corretorNome] = {};
+      STAGE_KEYS.forEach(s=>{ entry.corretor_funil_por_mes[mk][corretorNome][s] = 0; });
+    }
+    return entry.corretor_funil_por_mes[mk][corretorNome];
+  }
+  function ensureSemanaMonth(entry, mk, semana){
+    if(!entry.semanas_por_mes) entry.semanas_por_mes = {};
+    if(!entry.semanas_por_mes[mk]) entry.semanas_por_mes[mk] = {};
+    if(!entry.semanas_por_mes[mk][semana]){
+      entry.semanas_por_mes[mk][semana] = {};
+      STAGE_KEYS.forEach(s=>{ entry.semanas_por_mes[mk][semana][s] = 0; });
+    }
+    return entry.semanas_por_mes[mk][semana];
+  }
 
   // Forward Fill Variables (Preenchimento Automático)
   let last_db = null, last_canal = null, last_ger = null, last_sup = null, last_corr = null, last_reg = null;
@@ -991,11 +2244,12 @@ function parseWorkbook(ab){
   let last_db3 = null, last_ger3 = null, last_corr3 = null, last_loja3 = null;
 
   const equipe = {};
+  const vendasImobPorSup = {};
   const vendasPorNomeMes = {};
   const lojaPorNome = {};
   const parentPorNomeMes = {};
 
-  for(let r = headerRowIdx + 1; r < grid.length; r++) {
+  for(let r = Math.min(headerRowIdx, H2, H3) + 1; r < grid.length; r++) {
       const row = grid[r] || [];
       if(row.length === 0) continue;
 
@@ -1004,7 +2258,7 @@ function parseWorkbook(ab){
       const isTotal3 = String(row[C_db3] || '').includes('Total Geral');
 
       // Tabela 1: Funil
-      if(!isTotal1) {
+      if(r > headerRowIdx && !isTotal1) {
           if(row[C_db] !== undefined && row[C_db] !== null && row[C_db] !== '') last_db = row[C_db];
           if(row[C_canal] !== undefined && row[C_canal] !== null && row[C_canal] !== '') last_canal = row[C_canal];
           if(row[C_ger] !== undefined && row[C_ger] !== null && row[C_ger] !== '') last_ger = row[C_ger];
@@ -1028,17 +2282,63 @@ function parseWorkbook(ab){
                       const o = ensure(house, gerente);
                       if(regional) o.regional = regional;
                       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
+
+                      const corretorNome = String(last_corr || '').replace(/^\+\s*/, '').trim();
+                      if(corretorNome){
+                          const cm = ensureCorretorFunilMonth(o, mk, corretorNome);
+                          cm[stage] = (cm[stage]||0) + valor;
+                      }
+                      const diaDoMes = dayOfMonthFromExcelVal(last_db);
+                      const semana = weekOfMonth(diaDoMes);
+                      if(semana){
+                          const sm = ensureSemanaMonth(o, mk, semana);
+                          sm[stage] = (sm[stage]||0) + valor;
+                      }
+                      // Funil do GERENTE por dia (comparar com performance anterior no mesmo dia)
+                      if(diaDoMes && DIA_STAGES[stage]){
+                          if(!o.dia) o.dia = {};
+                          if(!o.dia[mk]) o.dia[mk] = {};
+                          if(!o.dia[mk][diaDoMes]) o.dia[mk][diaDoMes] = {};
+                          o.dia[mk][diaDoMes][stage] = (o.dia[mk][diaDoMes][stage]||0) + valor;
+                      }
+                      // Funil por corretor e por DIA (comparativo "mesmo período").
+                      // Só as etapas usadas nas conversões; esparso (só dias com dado).
+                      if(corretorNome && diaDoMes && DIA_STAGES[stage]){
+                          if(!o.corretor_dia) o.corretor_dia = {};
+                          if(!o.corretor_dia[mk]) o.corretor_dia[mk] = {};
+                          if(!o.corretor_dia[mk][corretorNome]) o.corretor_dia[mk][corretorNome] = {};
+                          const cd = o.corretor_dia[mk][corretorNome];
+                          if(!cd[diaDoMes]) cd[diaDoMes] = {};
+                          cd[diaDoMes][stage] = (cd[diaDoMes][stage]||0) + valor;
+                      }
                   } else if(mk && canal === 'IMOB' && supervisor) {
                       const o = ensure(imob, supervisor);
                       if(regional) o.regional = regional;
                       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
+
+                      // Funil por IMOBILIÁRIA do supervisor (mensal e por dia).
+                      // Sem preenchimento automático: o nome vem da própria linha.
+                      const imobNome = (C_imob !== undefined ? cleanTxt(row[C_imob]) : '') || SEM_IMOB;
+                      if(!o.imobs) o.imobs = {};
+                      if(!o.imobs[mk]) o.imobs[mk] = {};
+                      if(!o.imobs[mk][imobNome]){ o.imobs[mk][imobNome] = {}; STAGE_KEYS.forEach(k=>{ o.imobs[mk][imobNome][k] = 0; }); }
+                      o.imobs[mk][imobNome][stage] += valor;
+                      const diaImob = dayOfMonthFromExcelVal(last_db);
+                      if(diaImob && DIA_STAGES[stage]){
+                          if(!o.imobs_dia) o.imobs_dia = {};
+                          if(!o.imobs_dia[mk]) o.imobs_dia[mk] = {};
+                          if(!o.imobs_dia[mk][imobNome]) o.imobs_dia[mk][imobNome] = {};
+                          const idd = o.imobs_dia[mk][imobNome];
+                          if(!idd[diaImob]) idd[diaImob] = {};
+                          idd[diaImob][stage] = (idd[diaImob][stage]||0) + valor;
+                      }
                   }
               }
           }
       }
 
       // Tabela 2: Equipe
-      if(!isTotal2) {
+      if(r > H2 && !isTotal2) {
           if(row[C_db2] !== undefined && row[C_db2] !== null && row[C_db2] !== '') last_db2 = row[C_db2];
           if(row[C_reg2] !== undefined && row[C_reg2] !== null && row[C_reg2] !== '') last_reg2 = row[C_reg2];
           if(row[C_ger2] !== undefined && row[C_ger2] !== null && row[C_ger2] !== '') last_ger2 = row[C_ger2];
@@ -1057,16 +2357,28 @@ function parseWorkbook(ab){
       }
 
       // Tabela 3: Vendas
-      if(!isTotal3) {
+      if(r > H3 && !isTotal3) {
           if(row[C_db3] !== undefined && row[C_db3] !== null && row[C_db3] !== '') last_db3 = row[C_db3];
           if(row[C_ger3] !== undefined && row[C_ger3] !== null && row[C_ger3] !== '') last_ger3 = row[C_ger3];
           if(row[C_corr3] !== undefined && row[C_corr3] !== null && row[C_corr3] !== '') last_corr3 = row[C_corr3];
           if(row[C_loja3] !== undefined && row[C_loja3] !== null && row[C_loja3] !== '') last_loja3 = row[C_loja3];
 
           const vendas = row[C_vendas];
-          if(vendas !== undefined && vendas !== null && last_corr3 && last_db3 && last_ger3) {
+          // Vendas por supervisor IMOB × imobiliária × mês (não depende do gerente)
+          if(typeof vendas === 'number' && C_imob3 !== undefined && last_corr3 && last_db3) {
+              const mkI = parseExcelDate(last_db3);
+              const supI = cleanTxt(last_corr3);
+              const imobI = cleanTxt(row[C_imob3]) || SEM_IMOB;
+              if(mkI && supI){
+                  if(!vendasImobPorSup[supI]) vendasImobPorSup[supI] = {};
+                  if(!vendasImobPorSup[supI][mkI]) vendasImobPorSup[supI][mkI] = {};
+                  vendasImobPorSup[supI][mkI][imobI] = (vendasImobPorSup[supI][mkI][imobI]||0) + vendas;
+              }
+          }
+          // (o gerente não é obrigatório: vendas de supervisor IMOB não têm gerente)
+          if(vendas !== undefined && vendas !== null && last_corr3 && last_db3) {
               const mk = parseExcelDate(last_db3);
-              const g = String(last_ger3).replace(/^\+\s*/, '').trim();
+              const g = last_ger3 ? String(last_ger3).replace(/^\+\s*/, '').trim() : '';
               const nome = String(last_corr3).replace(/^\+\s*/, '').trim();
               const loja = String(last_loja3 || '').replace(/^\+\s*/, '').trim();
 
@@ -1114,8 +2426,15 @@ function parseWorkbook(ab){
               entry.vendas_por_mes = vendasPorGerenteMes[name] || {};
               entry.produtivos_por_mes = produtivosPorGerenteMes[name] || {};
               entry.corretores_por_mes = corretoresPorGerenteMes[name] || {};
+              entry.corretor_funil_por_mes = info.corretor_funil_por_mes || {};
+              entry.semanas_por_mes = info.semanas_por_mes || {};
+              entry.corretor_dia_por_mes = info.corretor_dia || {};
+              entry.dia_por_mes = info.dia || {};
           } else {
               entry.vendas_por_mes = vendasPorNomeMes[name] || {};
+              entry.imobs_por_mes = info.imobs || {};
+              entry.imobs_dia_por_mes = info.imobs_dia || {};
+              entry.imobs_vendas_por_mes = vendasImobPorSup[name] || {};
           }
           return entry;
       });
@@ -1201,12 +2520,27 @@ function initApp(){
     document.getElementById('btnImob').classList.toggle('active', 'btnImob' === activeBtnId);
     document.getElementById('btnRankHouse').classList.toggle('active', 'btnRankHouse' === activeBtnId);
     document.getElementById('btnRankImob').classList.toggle('active', 'btnRankImob' === activeBtnId);
+    document.getElementById('btnFunilGerencial').classList.toggle('active', 'btnFunilGerencial' === activeBtnId);
     
     renderAll();
   }
   
   document.getElementById('btnHouse').addEventListener('click', ()=> setCanal('house','btnHouse'));
   document.getElementById('btnImob').addEventListener('click', ()=> setCanal('imob','btnImob'));
+  document.getElementById('btnFunilGerencial').addEventListener('click', ()=> setCanal('funil_gerencial','btnFunilGerencial'));
+  document.getElementById('fgGerenteSelect').addEventListener('change', (e)=>{
+    selectedGerenteFG = e.target.value;
+    renderFunilGerencial();
+  });
+  document.getElementById('fgCompareBtn').addEventListener('click', ()=>{ fgCompareOpen = !fgCompareOpen; renderFunilGerencial(); });
+  document.getElementById('fgTabFunil').addEventListener('click', ()=>{ fgCorretorTab='funil'; applyFgCorretorTab(); });
+  document.getElementById('fgTabDiag').addEventListener('click', ()=>{ fgCorretorTab='diag'; applyFgCorretorTab(); });
+  document.getElementById('fgDiagSoAlerta').addEventListener('change', (e)=>{ fgDiagSoAlerta = e.target.checked; renderFgDiagTable(); });
+  document.getElementById('fgMetaVenda').addEventListener('input', (e)=>{
+    if(!selectedGerenteFG) return;
+    metaVendaPorGerente[selectedGerenteFG] = parseFloat(e.target.value) || 0;
+    renderFunilGerencial();
+  });
   
   document.getElementById('btnRankMenu').addEventListener('click', function(e) {
     e.stopPropagation();
