@@ -152,6 +152,17 @@
   tbody tr.data-row{ border-bottom:1px solid var(--line); transition:background .1s; cursor:pointer; }
   tbody tr.data-row:hover{ background:#F3F8F5; }
   tbody tr.expanded{ background:#EFF6F1; }
+  /* Linha de totalização — aparece ao final dos dados filtrados do House / IMOB. */
+  tbody tr.data-total-row td{
+    background:#E2EFE6; border-top:3px solid var(--brand-2);
+    color:var(--ink); font-weight:800; padding-top:14px; padding-bottom:14px;
+  }
+  tbody tr.data-total-row td.total-label{ text-align:left; color:var(--brand); white-space:nowrap; }
+  tbody tr.data-total-row td.total-average{ color:var(--brand-2); font-family:'IBM Plex Mono',monospace; }
+  tbody tr.data-total-row td.gap-pos{ color:#0F6B3D; }
+  tbody tr.data-total-row td.gap-neg{ color:#B42318; }
+  tbody tr.data-total-row td.total-scope{ color:var(--brand-2); font-size:11px; }
+
   tbody td{ padding:10px 10px; font-size:13px; text-align:center; white-space:nowrap; }
   tbody td.left{ text-align:left; font-weight:600; color:var(--ink-2); }
   .heat{ border-radius:6px; padding:4px 8px; display:inline-block; min-width:56px; font-weight:700; font-family:'IBM Plex Mono'; font-size:12.5px;}
@@ -215,6 +226,7 @@
   .detail-inner{ padding:28px 30px 34px 30px; background:#F7FAF8; border-bottom:1px solid var(--line); }
   .funnel-title{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700; margin-bottom:20px;}
   .detail-lower{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+  .detail-lower.imob-atividade-kpis{ grid-template-columns:repeat(3,minmax(0,1fr)); }
   .stat-box{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
   .stat-box .l{ font-size:10.5px; text-transform:uppercase; color:var(--muted); font-weight:700; letter-spacing:.05em;}
   .stat-box .v{ font-family:'Space Grotesk'; font-size:20px; font-weight:700; margin-top:4px;}
@@ -416,6 +428,7 @@
   @media (max-width:900px){
     .kpi-grid{ grid-template-columns:repeat(2,1fr); }
     .detail-lower{ grid-template-columns:1fr 1fr; }
+    .detail-lower.imob-atividade-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
     .detail-split{ grid-template-columns:1fr; }
   }
 
@@ -1022,6 +1035,7 @@ function getColumns(canalType){
     {key:'regional', label:'Regional', sortable:true},
     {key:'nome', label: ct==='house' ? 'Gerente' : 'Supervisor', left:true, sortable:true},
   ];
+  // Leads e conversão Lead → Doc. são exclusivos do Canal House.
   if(ct==='house'){
     cols.push({key:'LEAD', label:'Leads', sortable:true, render:r=>fmtInt(r.LEAD)});
     cols.push({key:'lead_doc', label:'Lead → Doc.', sortable:true, isHeat:true, compute:r=>pct(r.DOC_ENVIADA, r.LEAD), range:[10,13]});
@@ -1071,6 +1085,41 @@ function renderRegionalChips(rows){
   el.querySelectorAll('.chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{ regionalFilter = chip.dataset.reg; expandedRow = null; renderAll(); });
   });
+}
+
+/**
+ * Resume as colunas que realmente existem no canal exibido.
+ * Contagens e GAP são somados; taxas são a média aritmética dos percentuais
+ * válidos (linhas com denominador igual a zero não entram na média).
+ * Usa as linhas já filtradas por regional, nome e mês e não altera o ranking.
+ */
+function renderTotalRow(rows, cols){
+  let html = '<tr class="data-total-row" aria-label="Total e média dos registros filtrados">';
+  html += '<td class="rank">∑</td>';
+  cols.forEach(c=>{
+    if(c.key === 'regional'){
+      // Indica a região considerada, ou todas, quando nenhuma região está selecionada.
+      const regiao = regionalFilter === 'ALL' ? 'Todas' : regionalFilter;
+      html += `<td class="total-scope">${regiao}</td>`;
+    } else if(c.key === 'nome'){
+      html += '<td class="total-label">TOTAL / MÉDIA</td>';
+    } else if(c.isHeat && typeof c.compute === 'function'){
+      const percentuais = rows.map(r=>c.compute(r)).filter(v=>Number.isFinite(v));
+      const media = percentuais.length
+        ? percentuais.reduce((s,v)=>s+v, 0) / percentuais.length
+        : null;
+      html += `<td class="total-average">${fmtPct(media)}</td>`;
+    } else if(c.isGap && typeof c.compute === 'function'){
+      const totalGap = rows.reduce((s,r)=>s+(Number(c.compute(r)) || 0), 0);
+      const classe = totalGap >= 0 ? 'gap-pos' : 'gap-neg';
+      html += `<td class="mono ${classe}">${totalGap>0?'+':''}${fmtInt(totalGap)}</td>`;
+    } else {
+      // Demais colunas numéricas: leads, docs, CPF, vendas e equipes.
+      const total = rows.reduce((s,r)=>s+(Number(r[c.key]) || 0), 0);
+      html += `<td class="mono">${fmtInt(total)}</td>`;
+    }
+  });
+  return html + '</tr>';
 }
 
 function renderTable(rows){
@@ -1136,6 +1185,9 @@ function renderTable(rows){
       html += renderDetailRow(r, cols.length+1);
     }
   });
+  // Resumo após a última linha (inclusive quando existe um detalhamento expandido).
+  // Só considera as linhas atualmente visíveis, não o conjunto completo da planilha.
+  html += renderTotalRow(rows, cols);
   body.innerHTML = html;
 
   body.querySelectorAll('tr.data-row').forEach(tr=>{
@@ -1305,8 +1357,7 @@ function renderCorretorComparativoPeriodo(r){
    Hierarquia: Gerente IMOB → supervisor (esta linha) → imobiliárias.
    Mostra o funil de cada imobiliária no período (dias 1 a D do mês
    selecionado) contra a MÉDIA dos 3 meses anteriores nos mesmos dias, as
-   vendas (base de vendas assinadas, mensal) e um lembrete das imobiliárias
-   que tinham movimento antes e ainda não desenvolveram o funil neste mês.
+   vendas (base de vendas assinadas, mensal) e o diagnóstico por imobiliária.
 =============================================================*/
 const IM_STAGES = [
   { key:'LEAD',          label:'Lead' },
@@ -1395,20 +1446,6 @@ function renderImobSection(r){
   }).filter(x => x.histAtiv || x.nowAtiv)
     .sort((a,b)=> (b.now.LEAD - a.now.LEAD) || (b.now.DOC_ENVIADA - a.now.DOC_ENVIADA) || a.nome.localeCompare(b.nome));
 
-  // Lembrete: tinham funil antes e ainda não desenvolveram neste mês
-  const pendentes = rows.filter(x => x.nome !== IM_SEM_IMOB && (x.semMovimento || x.faltas.length > 0))
-    .sort((a,b)=> (b.semMovimento - a.semMovimento) || (b.faltas.length - a.faltas.length) || ((b.past.LEAD + b.past.DOC_ENVIADA) - (a.past.LEAD + a.past.DOC_ENVIADA)));
-  const ref = (x)=> `méd. 3M (mesmo período): ${x.past.LEAD.toFixed(1).replace('.',',')} lead · ${x.past.DOC_ENVIADA.toFixed(1).replace('.',',')} doc · ${x.past.CPF_APROVADO.toFixed(1).replace('.',',')} CPF · ${x.vPast.toFixed(1).replace('.',',')} vendas/mês`;
-  const alerta = pendentes.length === 0
-    ? `<div class="im-ok">✅ Todas as imobiliárias que tinham funil nos meses anteriores já têm movimento neste período.</div>`
-    : `<div class="im-alert">
-        <div class="im-alert-title">⚠️ Lembrete: ${pendentes.length} imobiliária${pendentes.length>1?'s':''} ainda não ${pendentes.length>1?'desenvolveram':'desenvolveu'} o funil neste período</div>
-        ${pendentes.map(x=>`<div class="im-alert-item">
-          <span><b title="${x.nome}">${x.nome}</b> ${x.semMovimento ? '<span class="im-chip">Sem movimento no mês</span>' : x.faltas.map(f=>`<span class="im-chip warn">${f}</span>`).join('')}</span>
-          <span class="im-alert-ref">${ref(x)}</span>
-        </div>`).join('')}
-      </div>`;
-
   const tot = { now:{}, past:{}, vNow:0, vPast:0 };
   Object.keys(DIA_STAGES).forEach(k=>{ tot.now[k]=0; tot.past[k]=0; });
   rows.forEach(x=>{ Object.keys(DIA_STAGES).forEach(k=>{ tot.now[k]+=x.now[k]; tot.past[k]+=x.past[k]; }); tot.vNow += x.vNow; tot.vPast += x.vPast; });
@@ -1428,9 +1465,35 @@ function renderImobSection(r){
   return `<div class="im-wrap">
     ${titulo}
     <div class="im-sub">Funil: valor do período e, embaixo, comparação com a média dos 3 meses anteriores nos mesmos dias (▲ acima · ▼ abaixo). Vendas: base de vendas assinadas, que é mensal — por isso a média é por mês fechado.</div>
-    ${alerta}
     <div class="im-scroll"><table class="im-table">${head}<tbody>${totalRow}${body}</tbody></table></div>
   </div>`;
+}
+
+/**
+ * Imobiliárias com movimentação em alguma etapa do funil (quantidade > 0).
+ * Ativas: movimentaram no mês selecionado.
+ * Inativas: movimentaram em ao menos um dos três meses anteriores, mas não
+ * no mês selecionado. Cada nome conta uma única vez; registros sem nome
+ * de imobiliária não entram na contagem.
+ */
+function getImobAtividadeSupervisor(nomeSupervisor){
+  const entry = findEntry('imob', nomeSupervisor);
+  if(!entry) return { ativas:0, inativas:0 };
+
+  const funil = entry.imobs_por_mes || {};
+  const atual = funil[CURRENT_MONTH] || {};
+  const anteriores = PREV_3_MONTHS.map(mk=> funil[mk] || {});
+  const nomes = new Set(Object.keys(atual));
+  anteriores.forEach(mes=> Object.keys(mes).forEach(nome=> nomes.add(nome)));
+
+  const movimentou = (etapas)=> !!etapas && STAGE_KEYS.some(k=> Number(etapas[k]) > 0);
+  let ativas = 0, inativas = 0;
+  nomes.forEach(nome=>{
+    if(!nome || nome === IM_SEM_IMOB) return;
+    if(movimentou(atual[nome])) ativas++;
+    else if(anteriores.some(mes=> movimentou(mes[nome]))) inativas++;
+  });
+  return { ativas, inativas };
 }
 
 function renderDetailRow(r, colspan){
@@ -1462,12 +1525,15 @@ function renderDetailRow(r, colspan){
       </div>
     `;
   } else {
+    const imobs = getImobAtividadeSupervisor(r.nome);
     topStatsHtml = `
-      <div class="detail-lower">
+      <div class="detail-lower imob-atividade-kpis">
         <div class="stat-box"><div class="l">CPF Aprov./Cond.</div><div class="v">${fmtInt(r.CPF_APROVADO)}</div></div>
         <div class="stat-box"><div class="l">Vendas</div><div class="v">${fmtInt(r.vendas)}</div></div>
         <div class="stat-box"><div class="l">Aprov. → Venda</div><div class="v">${fmtPct(convOut)}</div></div>
         <div class="stat-box"><div class="l">Gap vs. meta</div><div class="v">${r.CPF_APROVADO-meta}</div></div>
+        <div class="stat-box" title="Imobiliárias com movimentação em alguma etapa do funil no mês selecionado"><div class="l">Imobs ativas</div><div class="v">${fmtInt(imobs.ativas)}</div></div>
+        <div class="stat-box" title="Imobiliárias com movimentação no funil em ao menos um dos três meses anteriores e nenhuma no mês selecionado"><div class="l">Imobs inativas</div><div class="v">${fmtInt(imobs.inativas)}</div></div>
       </div>
     `;
   }
