@@ -1089,8 +1089,8 @@ function renderRegionalChips(rows){
 
 /**
  * Resume as colunas que realmente existem no canal exibido.
- * Contagens e GAP são somados; taxas são a média aritmética dos percentuais
- * válidos (linhas com denominador igual a zero não entram na média).
+ * Contagens e GAP são somados; conversões são calculadas sobre os
+ * totais consolidados (soma dos numeradores / soma dos denominadores).
  * Usa as linhas já filtradas por regional, nome e mês e não altera o ranking.
  */
 function renderTotalRow(rows, cols){
@@ -1104,11 +1104,13 @@ function renderTotalRow(rows, cols){
     } else if(c.key === 'nome'){
       html += '<td class="total-label">TOTAL / MÉDIA</td>';
     } else if(c.isHeat && typeof c.compute === 'function'){
-      const percentuais = rows.map(r=>c.compute(r)).filter(v=>Number.isFinite(v));
-      const media = percentuais.length
-        ? percentuais.reduce((s,v)=>s+v, 0) / percentuais.length
-        : null;
-      html += `<td class="total-average">${fmtPct(media)}</td>`;
+      // Conversão REAL da seleção, ponderada pelo volume da etapa anterior.
+      // Não calcular a média simples dos percentuais de cada supervisor/gerente.
+      const numerador = c.key === 'lead_doc' ? 'DOC_ENVIADA' : 'vendas';
+      const denominador = c.key === 'lead_doc' ? 'LEAD' : 'CPF_APROVADO';
+      const totalNumerador = rows.reduce((s,r)=>s+(Number(r[numerador]) || 0), 0);
+      const totalDenominador = rows.reduce((s,r)=>s+(Number(r[denominador]) || 0), 0);
+      html += `<td class="total-average">${fmtPct(pct(totalNumerador, totalDenominador))}</td>`;
     } else if(c.isGap && typeof c.compute === 'function'){
       const totalGap = rows.reduce((s,r)=>s+(Number(c.compute(r)) || 0), 0);
       const classe = totalGap >= 0 ? 'gap-pos' : 'gap-neg';
