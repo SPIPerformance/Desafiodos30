@@ -959,6 +959,7 @@ function flattenEntry(entry, monthKey, isHouse){
     row.equipe_total = eq.total || 0;
     row.equipe_data_referencia = eq.diaReferencia !== undefined ? eq.diaReferencia : null;
     row.equipe_linhas = eq.linhas || 0;
+    row.equipe_linha_excel = eq.linhaExcel || null;
     row.equipe_nome_origem = entry.equipe_nome_origem || '';
     row.equipe_match_metodo = entry.equipe_match_metodo || 'não encontrado';
     row.equipe_inativos = eq.inativos || 0;
@@ -1059,7 +1060,7 @@ function getColumns(canalType){
         ? 'Gerente não localizado na tabela de equipes da TD Painel'
         : r.equipe_data_referencia === null
         ? `Gerente localizado como ${r.equipe_nome_origem}, mas sem registro no mês selecionado`
-        : `TD Painel · gerente: ${r.equipe_nome_origem} · correspondência: ${r.equipe_match_metodo} · data-base: dia ${r.equipe_data_referencia} · ${r.equipe_linhas} registro(s)`;
+        : `TD Painel · gerente: ${r.equipe_nome_origem} · correspondência: ${r.equipe_match_metodo} · dia ${r.equipe_data_referencia} · linha Excel ${r.equipe_linha_excel || '?'} · ${r.equipe_linhas} registro(s) encontrado(s), sem somar duplicatas`;
       return `<span title="${safe(msg)}">${fmtInt(r.equipe_total)}</span>`;
     }});
     cols.push({key:'equipe_produtiva', label:'Equipe Prod.', sortable:true, render:r=>fmtInt(r.equipe_produtiva)});
@@ -2447,13 +2448,14 @@ function parseWorkbook(ab){
 
   // Forward Fill Variables (Preenchimento Automático)
   let last_db = null, last_canal = null, last_ger = null, last_sup = null, last_corr = null, last_reg = null;
-  let last_db2 = null, last_reg2 = null, last_ger2 = null;
+  let last_db2 = null, last_reg2 = null;
   let last_db3 = null, last_ger3 = null, last_corr3 = null, last_loja3 = null;
 
-  // Equipes: a Tabela 2 pode ter várias linhas por gerente no mesmo dia/mês.
-  // Guardar somente a última linha (como fazia o código anterior) transformava
-  // totais reais em 1, 2 etc. Agrupamos as parcelas por data e, quando há
-  // fotografias em dias diferentes, usamos a data mais recente do mês.
+  // Equipes: TotalCorretores JA E O TOTAL do gerente no registro.
+  // Nunca somar varias linhas do mesmo gerente (23 + 2 nao significa 25).
+  // Havendo duplicatas na mesma data, usa a maior contagem informada, evitando
+  // que linhas parciais/residuais sobrescrevam a contagem principal.
+  // Entre datas diferentes, usa apenas a data mais recente do mes.
   const equipePorData = Object.create(null);
   const chaveNomeEquipe = (nome) => String(nome || '').normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '').replace(/^\+\s*/, '')
@@ -2560,14 +2562,20 @@ function parseWorkbook(ab){
       if(r > H2 && !isTotal2) {
           if(row[C_db2] !== undefined && row[C_db2] !== null && row[C_db2] !== '') last_db2 = row[C_db2];
           if(row[C_reg2] !== undefined && row[C_reg2] !== null && row[C_reg2] !== '') last_reg2 = row[C_reg2];
-          if(row[C_ger2] !== undefined && row[C_ger2] !== null && row[C_ger2] !== '') last_ger2 = row[C_ger2];
+          // Nao herdar o gerente da linha acima: numa tabela-resumo, a coluna
+          // nom_gerente deve identificar explicitamente a qual equipe pertence
+          // TotalCorretores. O preenchimento automatico aqui associava totais
+          // de linhas vazias/subtotais ao gerente anterior.
+          const gerenteEquipeBruto = row[C_ger2];
+          const gerenteEquipe = gerenteEquipeBruto === null || gerenteEquipeBruto === undefined
+              ? '' : String(gerenteEquipeBruto).trim();
 
           const tot = row[C_tot];
           const tot10 = row[C_inativos];
 
-          if(tot !== undefined && tot !== null && tot !== '' && last_ger2 && last_db2) {
+          if(tot !== undefined && tot !== null && tot !== '' && gerenteEquipe && last_db2) {
               const mk = parseExcelDate(last_db2);
-              const g = chaveNomeEquipe(last_ger2);
+              const g = chaveNomeEquipe(gerenteEquipe);
               const numeroEquipe = (v)=>{
                   if(typeof v === 'number') return v;
                   const vStr = String(v === null || v === undefined ? '' : v).trim();
@@ -2583,11 +2591,23 @@ function parseWorkbook(ab){
                   const dia = dayOfMonthFromExcelVal(last_db2) || 0;
                   if(!equipePorData[g]) equipePorData[g] = Object.create(null);
                   if(!equipePorData[g][mk]) equipePorData[g][mk] = Object.create(null);
-                  if(!equipePorData[g][mk][dia]) equipePorData[g][mk][dia] = {total:0, inativos:0, linhas:0};
+                  if(!equipePorData[g][mk][dia]) equipePorData[g][mk][dia] = {
+                      total:nTotal, inativos:Number.isFinite(nInativos) ? nInativos : 0,
+                      linhas:0, origemLinha:r+1, registros:[]
+                  };
                   const d = equipePorData[g][mk][dia];
-                  d.total += nTotal;
-                  d.inativos += Number.isFinite(nInativos) ? nInativos : 0;
+                  d.registros.push({linha:r+1, gerente:gerenteEquipe,
+                      total:nTotal, inativos:Number.isFinite(nInativos) ? nInativos : 0});
                   d.linhas++;
+                  // TotalCorretores nao e parcela de equipe: cada valor ja
+                  // representa uma contagem. Duplicatas jamais sao somadas.
+                  // Havendo totais conflitantes na mesma data, prevalece o
+                  // maior total informado (mantendo os demais na auditoria).
+                  if(nTotal >= d.total){
+                      d.total = nTotal;
+                      d.inativos = Number.isFinite(nInativos) ? nInativos : 0;
+                      d.origemLinha = r+1;
+                  }
               }
           }
       }
@@ -2653,9 +2673,8 @@ function parseWorkbook(ab){
       });
   });
 
-  // Consolida todas as linhas do mesmo gerente na mesma data.
-  // DataBase identifica a fotografia da equipe; datas diferentes no mesmo
-  // mês NÃO podem ser somadas (somaríamos o mesmo quadro repetidamente).
+  // Escolhe o registro de referencia da data mais recente por gerente/mes.
+  // TotalCorretores e valor pronto da fonte; datas e duplicatas nao se somam.
   Object.keys(equipePorData).forEach(g => {
       equipe[g] = Object.create(null);
       Object.keys(equipePorData[g]).forEach(mk => {
@@ -2667,6 +2686,7 @@ function parseWorkbook(ab){
               inativos:Math.min(d.total, d.inativos),
               ativa:Math.max(0, d.total - d.inativos),
               linhas:d.linhas,
+              linhaExcel:d.origemLinha,
               diaReferencia:ultimoDia
           };
       });
