@@ -957,6 +957,10 @@ function flattenEntry(entry, monthKey, isHouse){
   if(isHouse){
     const eq = (entry.equipe_por_mes && entry.equipe_por_mes[monthKey]) || {total:0, inativos:0, ativa:0};
     row.equipe_total = eq.total || 0;
+    row.equipe_data_referencia = eq.diaReferencia !== undefined ? eq.diaReferencia : null;
+    row.equipe_linhas = eq.linhas || 0;
+    row.equipe_nome_origem = entry.equipe_nome_origem || '';
+    row.equipe_match_metodo = entry.equipe_match_metodo || 'não encontrado';
     row.equipe_inativos = eq.inativos || 0;
     row.equipe_ativa = eq.ativa || 0;
     row.vendas = (entry.vendas_por_mes && entry.vendas_por_mes[monthKey]) || 0;
@@ -1046,7 +1050,18 @@ function getColumns(canalType){
   cols.push({key:'vendas', label:'Vendas', sortable:true, render:r=>fmtInt(r.vendas)});
   cols.push({key:'gap', label:'Gap CPF', sortable:true, isGap:true, compute:r=>r.CPF_APROVADO - meta});
   if(ct==='house'){
-    cols.push({key:'equipe_ativa', label:'Equipe', sortable:true, render:r=>fmtInt(r.equipe_ativa)});
+    // Equipe representa o TOTAL de corretores cadastrados (Tabela 2 / TotalCorretores).
+    // Não confundir com 'equipe_ativa': total menos quem está sem login há 10+ dias.
+    cols.push({key:'equipe_total', label:'Equipe', sortable:true, render:r=>{
+      const safe = (x)=>String(x === null || x === undefined ? '' : x)
+          .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const msg = !r.equipe_nome_origem
+        ? 'Gerente não localizado na tabela de equipes da TD Painel'
+        : r.equipe_data_referencia === null
+        ? `Gerente localizado como ${r.equipe_nome_origem}, mas sem registro no mês selecionado`
+        : `TD Painel · gerente: ${r.equipe_nome_origem} · correspondência: ${r.equipe_match_metodo} · data-base: dia ${r.equipe_data_referencia} · ${r.equipe_linhas} registro(s)`;
+      return `<span title="${safe(msg)}">${fmtInt(r.equipe_total)}</span>`;
+    }});
     cols.push({key:'equipe_produtiva', label:'Equipe Prod.', sortable:true, render:r=>fmtInt(r.equipe_produtiva)});
   }
   return cols;
@@ -2353,15 +2368,43 @@ function parseWorkbook(ab){
   const pImob1 = findHdr(['nom_imobiliaria','nom_imobiliária','nome_imobiliaria'], {row: headerRowIdx, rowOnly: true, loose: true});
   const C_imob = pImob1 ? pImob1.c : undefined;
 
-  // Tabela 2 (equipe)
-  const pDb2 = findHdr(['DataBase']);
+  // Tabela 2 (equipe) — identifica os cinco cabeçalhos como UM BLOCO.
+  // A estrutura informada para TD Painel é M:Q, mas a busca por nomes permite
+  // que o Excel ganhe colunas novas sem desalinhar TotalCorretores (coluna P).
+  const headerEquipeNorm = (v)=>String(v === null || v === undefined ? '' : v)
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/gi,'').toUpperCase();
+  const nomesEquipe = ['DataBase','regional_co','nom_gerente','TotalCorretores','TotalCorretoresMais10DiasSemLogin'];
+  const cabecalhosEquipe = nomesEquipe.map(headerEquipeNorm);
+  let hEquipe = null;
+  for(let r=0; r<Math.min(50,grid.length); r++){
+      const rw = grid[r] || [];
+      for(let c=0; c<rw.length; c++){
+          if(headerEquipeNorm(rw[c]) !== cabecalhosEquipe[0]) continue;
+          const cols = cabecalhosEquipe.map(needle=>{
+              for(let j=c; j<Math.min(c+12,rw.length); j++){
+                  if(headerEquipeNorm(rw[j]) === needle) return j;
+              }
+              return -1;
+          });
+          const score = cols.filter(i=>i>=0).length;
+          if(score>=4 && (!hEquipe || score>hEquipe.score)) hEquipe={r,cols,score};
+      }
+  }
+  // Compatibilidade: cabeçalhos ausentes ou fora do bloco usam as posições
+  // explícitas M-Q, e a auditoria indica a ausência de cabeçalhos detectáveis.
+  const pDb2 = hEquipe ? {r:hEquipe.r,c:hEquipe.cols[0]} : findHdr(['DataBase']);
   const H2 = pDb2 ? pDb2.r : headerRowIdx;
-  const col2 = (name, fb)=>{ const p = findHdr([name], {row:H2}); return p ? p.c : fb; };
   const C_db2 = pDb2 ? pDb2.c : 12;
-  const C_reg2 = col2('regional_co', C_db2 + 1);
-  const C_ger2 = col2('nom_gerente', C_db2 + 2);
-  const C_tot = col2('TotalCorretores', C_db2 + 3);
-  const C_inativos = col2('TotalCorretoresMais10DiasSemLogin', C_db2 + 4);
+  const colEquipe = (pos, fallback)=>hEquipe && hEquipe.cols[pos]>=0 ? hEquipe.cols[pos] : fallback;
+  const C_reg2 = colEquipe(1,C_db2+1);
+  const C_ger2 = colEquipe(2,C_db2+2);
+  const C_tot = colEquipe(3,C_db2+3);
+  const C_inativos = colEquipe(4,C_db2+4);
+  const auditoriaColunasEquipe = {
+    aba:sheetName, linhaCabecalho:H2+1, confiancaCabecalhos:hEquipe ? hEquipe.score+'/5' : 'posicoes padrao (nao validado)',
+    colunas:{DataBase:C_db2+1,regional_co:C_reg2+1,nom_gerente:C_ger2+1,TotalCorretores:C_tot+1,TotalCorretoresMais10DiasSemLogin:C_inativos+1}
+  };
 
   // Tabela 3 (vendas) — nova coluna: NomeImobiliaria
   const pDb3 = findHdr(['DataBaseAssinaturaContratoSalesforce']);
@@ -2407,7 +2450,19 @@ function parseWorkbook(ab){
   let last_db2 = null, last_reg2 = null, last_ger2 = null;
   let last_db3 = null, last_ger3 = null, last_corr3 = null, last_loja3 = null;
 
-  const equipe = {};
+  // Equipes: a Tabela 2 pode ter várias linhas por gerente no mesmo dia/mês.
+  // Guardar somente a última linha (como fazia o código anterior) transformava
+  // totais reais em 1, 2 etc. Agrupamos as parcelas por data e, quando há
+  // fotografias em dias diferentes, usamos a data mais recente do mês.
+  const equipePorData = Object.create(null);
+  const chaveNomeEquipe = (nome) => String(nome || '').normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '').replace(/^\+\s*/, '')
+      .replace(/[^A-Za-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+  // Remove preposições apenas para a correspondência, nunca para alterar o
+  // nome exibido ou os registros da equipe.
+  const chaveSemPreposicoes = (nome)=>chaveNomeEquipe(nome).split(' ')
+      .filter(w=>w && !['DE','DA','DO','DOS','DAS','E'].includes(w)).join(' ');
+  const equipe = Object.create(null);
   const vendasImobPorSup = {};
   const vendasPorNomeMes = {};
   const lojaPorNome = {};
@@ -2510,12 +2565,29 @@ function parseWorkbook(ab){
           const tot = row[C_tot];
           const tot10 = row[C_inativos];
 
-          if(tot !== undefined && tot !== null && last_ger2 && last_db2) {
+          if(tot !== undefined && tot !== null && tot !== '' && last_ger2 && last_db2) {
               const mk = parseExcelDate(last_db2);
-              const g = String(last_ger2).replace(/^\+\s*/, '').trim();
-              if(mk && g) {
-                  if(!equipe[g]) equipe[g] = {};
-                  equipe[g][mk] = {total: tot || 0, inativos: tot10 || 0, ativa: (tot||0) - (tot10||0)};
+              const g = chaveNomeEquipe(last_ger2);
+              const numeroEquipe = (v)=>{
+                  if(typeof v === 'number') return v;
+                  const vStr = String(v === null || v === undefined ? '' : v).trim();
+                  if(!vStr) return 0;
+                  const limp = vStr.replace(/\s/g,'');
+                  return /^-?\d+(?:,\d+)?$/.test(limp) ? Number(limp.replace(',','.')) : Number(limp);
+              };
+              const nTotal = numeroEquipe(tot);
+              const nInativos = numeroEquipe(tot10) || 0;
+              // Evitar subtotais e textos/linhas sem quantidade válida.
+              if(/^\d{4}-\d{2}$/.test(mk || '') && g && !/^(TOTAL|TOTAL GERAL)$/.test(g)
+                 && Number.isFinite(nTotal) && nTotal >= 0) {
+                  const dia = dayOfMonthFromExcelVal(last_db2) || 0;
+                  if(!equipePorData[g]) equipePorData[g] = Object.create(null);
+                  if(!equipePorData[g][mk]) equipePorData[g][mk] = Object.create(null);
+                  if(!equipePorData[g][mk][dia]) equipePorData[g][mk][dia] = {total:0, inativos:0, linhas:0};
+                  const d = equipePorData[g][mk][dia];
+                  d.total += nTotal;
+                  d.inativos += Number.isFinite(nInativos) ? nInativos : 0;
+                  d.linhas++;
               }
           }
       }
@@ -2581,12 +2653,75 @@ function parseWorkbook(ab){
       });
   });
 
+  // Consolida todas as linhas do mesmo gerente na mesma data.
+  // DataBase identifica a fotografia da equipe; datas diferentes no mesmo
+  // mês NÃO podem ser somadas (somaríamos o mesmo quadro repetidamente).
+  Object.keys(equipePorData).forEach(g => {
+      equipe[g] = Object.create(null);
+      Object.keys(equipePorData[g]).forEach(mk => {
+          const porDia = equipePorData[g][mk];
+          const ultimoDia = Math.max(...Object.keys(porDia).map(Number));
+          const d = porDia[ultimoDia];
+          equipe[g][mk] = {
+              total:d.total,
+              inativos:Math.min(d.total, d.inativos),
+              ativa:Math.max(0, d.total - d.inativos),
+              linhas:d.linhas,
+              diaReferencia:ultimoDia
+          };
+      });
+  });
+  // Correspondência: primeiro nome completo exato; depois sem preposições;
+  // por fim prefixo ÚNICO de pelo menos duas palavras (nomes abreviados).
+  // Se dois gerentes compartilham o prefixo, NUNCA associamos automaticamente.
+  const chavesEquipe = Object.keys(equipe);
+  const equipeMatchInfo = Object.create(null);
+  function buscarEquipePorNome(nome){
+      const k = chaveNomeEquipe(nome);
+      if(equipe[k]) return {chave:k, metodo:'nome exato'};
+      const sem = chaveSemPreposicoes(nome);
+      const equivalentes = chavesEquipe.filter(a=>chaveSemPreposicoes(a) === sem);
+      if(equivalentes.length===1) return {chave:equivalentes[0], metodo:'sem preposicoes'};
+      const tokens = sem.split(' ').filter(Boolean);
+      if(tokens.length>=2){
+          const candidatos = chavesEquipe.filter(a=>{
+              const outras = chaveSemPreposicoes(a).split(' ').filter(Boolean);
+              const n = Math.min(tokens.length, outras.length);
+              return n>=2 && tokens.slice(0,n).join(' ') === outras.slice(0,n).join(' ');
+          });
+          if(candidatos.length===1) return {chave:candidatos[0], metodo:'prefixo unico'};
+          if(candidatos.length>1) return {chave:null,metodo:'ambíguo',candidatos};
+      }
+      return {chave:null,metodo:'não encontrado'};
+  }
+  // Os dados continuam apenas no navegador do usuário; nada é enviado.
+  window.__HOUSE_EQUIPE_DIAGNOSTICO__ = equipe;
+  window.__HOUSE_EQUIPE_AUDITORIA__ = {
+      cabecalhos:auditoriaColunasEquipe, registrosPorNomeEMes:equipePorData,
+      correspondencias:equipeMatchInfo
+  };
+  window.auditarEquipeHouse = function(termo){
+      const texto = chaveNomeEquipe(termo);
+      const nomes = Object.keys(equipeMatchInfo).filter(n=>chaveNomeEquipe(n).includes(texto));
+      return {
+          colunas:auditoriaColunasEquipe,
+          gerentes:nomes.map(nome=>({gerentePainel:nome, ...equipeMatchInfo[nome],
+              dados: equipeMatchInfo[nome].chave ? equipe[equipeMatchInfo[nome].chave] : null,
+              todasAsDatas: equipeMatchInfo[nome].chave ? equipePorData[equipeMatchInfo[nome].chave] : null
+          }))
+      };
+  };
+
   function buildEntries(map, isHouse){
       return Object.keys(map).map(name => {
           const info = map[name];
           const entry = {nome:name, regional:info.regional, months: info.months};
           if(isHouse){
-              entry.equipe_por_mes = equipe[name] || {};
+              const correspondencia = buscarEquipePorNome(name);
+              equipeMatchInfo[name] = correspondencia;
+              entry.equipe_por_mes = correspondencia.chave ? equipe[correspondencia.chave] : {};
+              entry.equipe_nome_origem = correspondencia.chave || '';
+              entry.equipe_match_metodo = correspondencia.metodo;
               entry.vendas_por_mes = vendasPorGerenteMes[name] || {};
               entry.produtivos_por_mes = produtivosPorGerenteMes[name] || {};
               entry.corretores_por_mes = corretoresPorGerenteMes[name] || {};
