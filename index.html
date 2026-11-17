@@ -2423,7 +2423,7 @@ function parseWorkbook(ab){
 
   const house = {};
   const imob = {};
-  function ensure(map, name){ if(!map[name]) map[name] = {regional:null, months:{}}; return map[name]; }
+  function ensure(map, name){ if(!map[name]) map[name] = {regional:null, regCounts:{}, months:{}}; return map[name]; }
   function ensureMonth(entry, mk){ if(!entry.months[mk]) entry.months[mk] = {}; STAGE_KEYS.forEach(s=>{ if(entry.months[mk][s]===undefined) entry.months[mk][s]=0; }); return entry.months[mk]; }
   // Funil por corretor e por semana (usados na aba "Funil Gerencial").
   // Só preenchidos pra HOUSE.
@@ -2482,8 +2482,8 @@ function parseWorkbook(ab){
       if(r > headerRowIdx && !isTotal1) {
           if(row[C_db] !== undefined && row[C_db] !== null && row[C_db] !== '') last_db = row[C_db];
           if(row[C_canal] !== undefined && row[C_canal] !== null && row[C_canal] !== '') last_canal = row[C_canal];
-          if(row[C_ger] !== undefined && row[C_ger] !== null && row[C_ger] !== '') last_ger = row[C_ger];
-          if(C_sup !== undefined && row[C_sup] !== undefined && row[C_sup] !== null && row[C_sup] !== '') last_sup = row[C_sup];
+          if(row[C_ger] !== undefined && row[C_ger] !== null && row[C_ger] !== '') { last_ger = row[C_ger]; last_reg = null; }
+          if(C_sup !== undefined && row[C_sup] !== undefined && row[C_sup] !== null && row[C_sup] !== '') { last_sup = row[C_sup]; last_reg = null; }
           if(C_corr !== undefined && row[C_corr] !== undefined && row[C_corr] !== null && row[C_corr] !== '') last_corr = row[C_corr];
           if(row[C_reg] !== undefined && row[C_reg] !== null && row[C_reg] !== '') last_reg = row[C_reg];
 
@@ -2501,7 +2501,10 @@ function parseWorkbook(ab){
 
                   if(mk && canal === 'HOUSE' && gerente) {
                       const o = ensure(house, gerente);
-                      if(regional) o.regional = regional;
+                      if(regional) {
+                          o.regional = regional;
+                          o.regCounts[regional] = (o.regCounts[regional] || 0) + (Number(valor) || 1);
+                      }
                       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
 
                       const corretorNome = String(last_corr || '').replace(/^\+\s*/, '').trim();
@@ -2534,7 +2537,10 @@ function parseWorkbook(ab){
                       }
                   } else if(mk && canal === 'IMOB' && supervisor) {
                       const o = ensure(imob, supervisor);
-                      if(regional) o.regional = regional;
+                      if(regional) {
+                          o.regional = regional;
+                          o.regCounts[regional] = (o.regCounts[regional] || 0) + (Number(valor) || 1);
+                      }
                       const ms = ensureMonth(o, mk); ms[stage] = (ms[stage]||0) + valor;
 
                       // Funil por IMOBILIÁRIA do supervisor (mensal e por dia).
@@ -2735,7 +2741,15 @@ function parseWorkbook(ab){
   function buildEntries(map, isHouse){
       return Object.keys(map).map(name => {
           const info = map[name];
-          const entry = {nome:name, regional:info.regional, months: info.months};
+          let bestReg = info.regional;
+          let bestCount = -1;
+          Object.keys(info.regCounts || {}).forEach(reg => {
+              if(info.regCounts[reg] > bestCount){
+                  bestCount = info.regCounts[reg];
+                  bestReg = reg;
+              }
+          });
+          const entry = {nome:name, regional:bestReg, months: info.months};
           if(isHouse){
               const correspondencia = buscarEquipePorNome(name);
               equipeMatchInfo[name] = correspondencia;
